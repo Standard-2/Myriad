@@ -1,13 +1,24 @@
 {
   "title": "Changelog",
-  "unreleased": null,
+  "description": "<!-- markdownlint-disable MD024 -->",
+  "unreleased": {
+    "notes": [
+      "Current target: [1.6.3]"
+    ],
+    "changes": {
+      "added": [
+        "Added missing alias for `crypt.base64decode`; `base64decode`",
+        "Added missing alias for `crypt.base64encode`; `base64encode`"
+      ]
+    }
+  },
   "releases": [
     {
       "version": "1.6.2",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.1...v1.6.2",
       "changes": {
         "added": [
           "Home section with a changelog tab"
@@ -16,11 +27,11 @@
     },
     {
       "version": "1.6.1",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.0...v1.6.1",
       "changes": {
         "fixed": [
           "Fixed an issue where Myriad's cleanup function would toggle between each execution, requiring double execution to re-execute"
@@ -29,10 +40,10 @@
     },
     {
       "version": "1.6.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.4...v1.6.0",
       "changes": {
         "added": [
           "Small declaration to the main window subtitle",
@@ -49,10 +60,10 @@
     },
     {
       "version": "1.5.4",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.3...v1.5.4",
       "changes": {
         "added": [
           "`Includes` option to the `Standards` test",
@@ -68,10 +79,10 @@
     },
     {
       "version": "1.5.3",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.2...v1.5.3",
       "changes": {
         "added": [
           "Custom `TestingState` component for test output",
@@ -89,10 +100,10 @@
     },
     {
       "version": "1.5.2",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.1...v1.5.2",
       "changes": {
         "added": [
           "`Window` settings tab",
@@ -105,11 +116,11 @@
     },
     {
       "version": "1.5.1",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.0...v1.5.1",
       "changes": {
         "changed": [
           "Removed nested check for `appendfile`; mirror `fopen` instead without path creation"
@@ -122,10 +133,10 @@
     },
     {
       "version": "1.5.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.0-beta.1...v1.5.0",
       "changes": {
         "added": [
           "New `Manual` framework for the `Standards` tests (#19)",
@@ -147,10 +158,10 @@
     },
     {
       "version": "1.5.0-beta.1",
-      "date": null,
       "tags": [
         "PRE-RELEASE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.4...v1.5.0-beta.1",
       "changes": {
         "added": [
           "New `Manual` framework for the `Standards` tests (#19)",
@@ -163,11 +174,11 @@
     },
     {
       "version": "1.4.4",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.3...v1.4.4",
       "changes": {
         "changed": [
           "Updated the testing gameid to the new one"
@@ -176,11 +187,11 @@
     },
     {
       "version": "1.4.3",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.2...v1.4.3",
       "changes": {
         "fixed": [
           "Fixed inability to publish results due to missing per-test time inclusion"
@@ -189,10 +200,10 @@
     },
     {
       "version": "1.4.2",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.1...v1.4.2",
       "changes": {
         "changed": [
           "Backend rework"
@@ -201,11 +212,11 @@
     },
     {
       "version": "1.4.1",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.0...v1.4.1",
       "changes": {
         "fixed": [
           "Fixed actor location"
@@ -214,10 +225,10 @@
     },
     {
       "version": "1.4.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.3...v1.4.0",
       "changes": {
         "added": [
           "`getsenv` checks for dead scripts and scripts with nil `.script` property",
@@ -233,9 +244,9 @@
           "`require` to the standard",
           "`getreg` to the standard",
           "New executor vulnerabilities module",
-          "File access vulnerability (`file://` protocol bypass) checks for `request`, `http_request`, `http.request`, `HttpGet`, `HttpGetAsync`, and `game` methods",
+          "File access vulnerability (`file:\/\/` protocol bypass) checks for `request`, `http_request`, `http.request`, `HttpGet`, `HttpGetAsync`, and `game` methods",
           "`OmniRecommendationsService` and `HttpRbxApiService` to Services blocklist tests",
-          "`escapes` vulnerabilities module with Environment/Context Escape test using `clonefunction` and `hookmetamethod`",
+          "`escapes` vulnerabilities module with Environment\/Context Escape test using `clonefunction` and `hookmetamethod`",
           "Auth Leak testing as dedicated `leaks` module in vulnerability testing suite"
         ],
         "changed": [
@@ -251,10 +262,10 @@
     },
     {
       "version": "1.3.3",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.2...v1.3.3",
       "changes": {
         "added": [
           "New `debug.getproto` checks"
@@ -270,11 +281,11 @@
     },
     {
       "version": "1.3.2",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.1...v1.3.2",
       "changes": {
         "fixed": [
           "Fixed `cloneref` making a new table per `__index` invocation"
@@ -283,11 +294,11 @@
     },
     {
       "version": "1.3.1",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.0...v1.3.1",
       "changes": {
         "added": [
           "New `run_on_actor` checks"
@@ -303,10 +314,10 @@
     },
     {
       "version": "1.3.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.5...v1.3.0",
       "changes": {
         "added": [
           "Native signal library test (`Signal.new`)",
@@ -325,28 +336,28 @@
     },
     {
       "version": "1.2.5",
-      "date": null,
       "tags": [
         "STABLE",
         "HOTFIX"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.4...v1.2.5",
       "changes": {
         "fixed": [
-          "Fixed `set`/`get` fflag tests not returning any status"
+          "Fixed `set`\/`get` fflag tests not returning any status"
         ]
       }
     },
     {
       "version": "1.2.4",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.3...v1.2.4",
       "changes": {
         "added": [
           "`getcustomasset` checks",
           "`isfunctionhooked` checks",
-          "`get`/`setfflag` checks",
+          "`get`\/`setfflag` checks",
           "`setsimulationradius` checks",
           "`clearqueueonteleport` checks"
         ],
@@ -361,10 +372,10 @@
     },
     {
       "version": "1.2.3",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.2...v1.2.3",
       "changes": {
         "added": [
           "Loadstring source chunk semantics (#5)",
@@ -384,10 +395,10 @@
     },
     {
       "version": "1.2.2",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.1...v1.2.2",
       "changes": {
         "added": [
           "Vulnerability test webresults support"
@@ -399,10 +410,10 @@
     },
     {
       "version": "1.2.1",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.0...v1.2.1",
       "changes": {
         "added": [
           "Vulnerability test"
@@ -411,10 +422,10 @@
     },
     {
       "version": "1.2.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.1.0...v1.2.0",
       "changes": {
         "added": [
           "Global exclusions to standards test"
@@ -430,10 +441,10 @@
     },
     {
       "version": "1.1.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.3...v1.1.0",
       "changes": {
         "added": [
           "`crypt.generatekey` uniqueness check",
@@ -453,10 +464,10 @@
     },
     {
       "version": "1.0.3",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.2...v1.0.3",
       "changes": {
         "added": [
           "Keytap alias \"keyclick\""
@@ -473,10 +484,10 @@
     },
     {
       "version": "1.0.2",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.1...v1.0.2",
       "changes": {
         "changed": [
           "Backend changes"
@@ -488,23 +499,23 @@
     },
     {
       "version": "1.0.1",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0...v1.0.1",
       "changes": {
         "added": [
-          "Touch/ended order checking for `firetouchinterest`",
+          "Touch\/ended order checking for `firetouchinterest`",
           "More build info to home page of UI"
         ]
       }
     },
     {
       "version": "1.0.0",
-      "date": null,
       "tags": [
         "STABLE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0-beta.3...v1.0.0",
       "changes": {
         "added": [
           "Moved to GitHub releases (old dist.luau loadstring redirects to the latest release)"
@@ -522,10 +533,10 @@
     },
     {
       "version": "1.0.0-beta.3",
-      "date": null,
       "tags": [
         "PRE-RELEASE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0-beta.2...v1.0.0-beta.3",
       "changes": {
         "fixed": [
           "Fixed `debug.getconstants`"
@@ -534,10 +545,10 @@
     },
     {
       "version": "1.0.0-beta.2",
-      "date": null,
       "tags": [
         "PRE-RELEASE"
       ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/releases\/tag\/v1.0.0-beta.2",
       "changes": {
         "added": [
           "New build system (ProCMP)"
@@ -550,5 +561,39 @@
         ]
       }
     }
-  ]
+  ],
+  "links": {
+    "1.0.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0-beta.3...v1.0.0",
+    "1.0.0-beta.2": "https:\/\/github.com\/Standard-2\/Myriad\/releases\/tag\/v1.0.0-beta.2",
+    "1.0.0-beta.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0-beta.2...v1.0.0-beta.3",
+    "1.0.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.0...v1.0.1",
+    "1.0.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.1...v1.0.2",
+    "1.0.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.2...v1.0.3",
+    "1.1.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.0.3...v1.1.0",
+    "1.2.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.1.0...v1.2.0",
+    "1.2.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.0...v1.2.1",
+    "1.2.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.1...v1.2.2",
+    "1.2.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.2...v1.2.3",
+    "1.2.4": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.3...v1.2.4",
+    "1.2.5": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.4...v1.2.5",
+    "1.3.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.2.5...v1.3.0",
+    "1.3.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.0...v1.3.1",
+    "1.3.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.1...v1.3.2",
+    "1.3.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.2...v1.3.3",
+    "1.4.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.3.3...v1.4.0",
+    "1.4.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.0...v1.4.1",
+    "1.4.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.1...v1.4.2",
+    "1.4.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.2...v1.4.3",
+    "1.4.4": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.3...v1.4.4",
+    "1.5.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.0-beta.1...v1.5.0",
+    "1.5.0-beta.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.4.4...v1.5.0-beta.1",
+    "1.5.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.0...v1.5.1",
+    "1.5.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.1...v1.5.2",
+    "1.5.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.2...v1.5.3",
+    "1.5.4": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.3...v1.5.4",
+    "1.6.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.5.4...v1.6.0",
+    "1.6.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.0...v1.6.1",
+    "1.6.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.1...v1.6.2",
+    "1.6.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.2...v1.6.3"
+  }
 }
