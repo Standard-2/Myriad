@@ -2,9 +2,7 @@
 
 # Changelog
 
-## [Unreleased]
-
-> Current target: [1.6.3]
+## [1.6.3] - `STABLE`
 
 ### Added
 
