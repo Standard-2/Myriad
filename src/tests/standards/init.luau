@@ -1,6 +1,6 @@
 --!nocheck
 
-local types = require("@packages/cascade/types")
+local cascade, _types = require("@packages/cascade"), require("@packages/cascade/types")
 
 return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.App)
 	--// Imports
@@ -13,6 +13,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local keybind = require("@modules/keybind")
 
 	--// Variables
+	local copyButton = nil
 	local currentTask = nil
 	local output = nil
 	local testingState = nil
@@ -68,6 +69,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 			if output then
 				output.__instance.Visible = false
+			end
+			if copyButton then
+				copyButton.__instance.Visible = false
 			end
 
 			local targetY = 0
@@ -229,6 +233,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				output.__instance.Visible = true
 				output:Clear()
 			end
+			if copyButton then
+				copyButton.__instance.Visible = true
+			end
 
 			if output and output.__instance then
 				local consoleY = output.__instance.AbsolutePosition.Y
@@ -371,7 +378,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 	--// Initialize
 	do -- Test Options
-		local form = tab:PageSection({Title = "Test Options", Subtitle = "Configure the tests"}):Form()
+		local form = tab:PageSection({ Title = "Test Options", Subtitle = "Configure the tests" }):Form()
 
 		titledRow(form, "Options"):Right():Button({
 			Label = "Configure",
@@ -384,41 +391,90 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 	-- Output
 	do
-		local form = tab:PageSection({Title = "Output", Subtitle = "View the results of the tests"}):Form()
-
+		-- Output section
 		do
-			local row = titledRow(form, "Run Test")
+			local section = tab:PageSection({ Title = "Output", Subtitle = "View the results of the tests" })
 
-			-- Show keybind
+			-- Form 1
 			do
-				local keybindRow = form:Row()
+				local form = section:Form()
 
-				local keybindField = keybindRow:Right():KeystrokeField({
-					Keys = config.keybinds.runStandardsTest.Value,
-					ValueChanged = function(_self, newKeys)
-						config.keybinds.runStandardsTest.Value = newKeys
+				titledRow(form, "Run Test"):Right():Button({
+					Label = "Run",
+					Pushed = function(self)
+						coroutine.wrap(test)()
 					end,
 				})
 
-				config.keybinds.runStandardsTest.Changed:Connect(function(newKeys)
-					keybindField.Keys = newKeys
-				end)
+				-- Show keybind
+				do
+					local keybindRow = form:Row()
 
-				keybind.new(config.keybinds.runStandardsTest, { sink = true }):Connect(function(inputComplete: boolean)
-					if not inputComplete then
-						return
-					end
+					local keybindField = keybindRow:Right():KeystrokeField({
+						Keys = config.keybinds.runStandardsTest.Value,
+						ValueChanged = function(_self, newKeys)
+							config.keybinds.runStandardsTest.Value = newKeys
+						end,
+					})
 
-					coroutine.wrap(test)()
-				end)
+					config.keybinds.runStandardsTest.Changed:Connect(function(newKeys)
+						keybindField.Keys = newKeys
+					end)
+
+					keybind
+						.new(config.keybinds.runStandardsTest, { sink = true })
+						:Connect(function(inputComplete: boolean)
+							if not inputComplete then
+								return
+							end
+
+							coroutine.wrap(test)()
+						end)
+				end
 			end
 
-			row:Right():Button({
-				Label = "Run",
-				Pushed = function()
-					coroutine.wrap(test)()
-				end,
-			})
+			-- Form 2
+			do
+				local form = section:Form()
+				copyButton = form
+
+				form:Row():Right():Button({
+					Label = "Copy output",
+					Pushed = function(self)
+						if output then
+							if setclipboard or toclipboard then
+								(setclipboard or toclipboard)(output:GetValue())
+								app:Notification({
+									App = "MYRIAD",
+									Title = "Copied output",
+									Subtitle = "Output copied to clipboard.",
+									Icon = cascade.Symbols.link,
+								})
+							else
+								app:Notification({
+									App = "MYRIAD",
+									Title = "Failed to copy output",
+									Icon = cascade.Symbols.exclamationmarkTriangle,
+								})
+							end
+						elseif output:GetValue() == "" then
+							app:Notification({
+								App = "MYRIAD",
+								Title = "There is no output.",
+								Icon = cascade.Symbols.exclamationmarkTriangle,
+							})
+						else
+							app:Notification({
+								App = "MYRIAD",
+								Title = "Output dosen't exist. Was the UI initialized properly?",
+								Icon = cascade.Symbols.exclamationmarkTriangle,
+							})
+						end
+					end,
+				})
+
+				form.__instance.Visible = false
+			end
 		end
 
 		testingState = tab:TestingState({
