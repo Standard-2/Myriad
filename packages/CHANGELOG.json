@@ -1,18 +1,22 @@
 {
   "title": "Changelog",
   "description": "<!-- markdownlint-disable MD024 -->",
-  "unreleased": {
-    "notes": [
-      "Current target: [1.6.3]"
-    ],
-    "changes": {
-      "added": [
-        "Added missing alias for `crypt.base64decode`; `base64decode`",
-        "Added missing alias for `crypt.base64encode`; `base64encode`"
-      ]
-    }
-  },
   "releases": [
+    {
+      "version": "1.6.3",
+      "tags": [
+        "STABLE"
+      ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.2...v1.6.3",
+      "changes": {
+        "added": [
+          "[Vulnerability test] Added a copy output button when the test has been completed",
+          "[Standards test] Added a copy output button when the test has been completed",
+          "[Standards test] Added missing alias for `crypt.base64decode`; `base64decode`",
+          "[Standards test] Added missing alias for `crypt.base64encode`; `base64encode`"
+        ]
+      }
+    },
     {
       "version": "1.6.2",
       "tags": [
