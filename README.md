@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 -->
+
 # Myriad General Validty Test
 
 [stars]: https://github.com/Standard-2/Myriad/stargazers
@@ -27,7 +29,7 @@ You can use our official loadstring:
 loadstring(game:HttpGetAsync("https://github.com/Standard-2/Myriad/releases/latest/download/myriad.luau"))()
 ```
 
-> Myriad testing game: https://www.roblox.com/games/79035306837882
+> Myriad testing game: <https://www.roblox.com/games/79035306837882>
 > The reason we use a roblox game for testing is because the executor environment is the very thing being tested, and the roblox environment helps to not rely on the executor as much. (Very simplified and there are many other reasons as well)
 
 Or load the [raw file](https://github.com/Standard-2/Myriad/releases/latest/download/myriad.luau)
