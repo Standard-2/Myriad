@@ -6,15 +6,21 @@
 [lastrel]: https://github.com/Standard-2/Myriad/releases/latest
 [lastcom]: https://github.com/Standard-2/Myriad/commits
 [disc]: https://discord.gg/nn4NxHU3Pu
+[site]: https://myriad.tools
+
+[badges/site]: https://img.shields.io/badge/Website-blue
 [badges/stars]: https://img.shields.io/github/stars/Standard-2/Myriad?label=Stars&logo=GitHub
 [badges/lastrel]: https://img.shields.io/github/v/release/Standard-2/Myriad?label=Latest%20Release
 [badges/lastcom]: https://img.shields.io/github/last-commit/Standard-2/Myriad?label=Last%20Modifed
 [badges/disc]: https://img.shields.io/discord/1371325686278651985?style=for-the-badge&label=Discord
+[badges/site]: https://img.shields.io/website?url=https%3A%2F%2Fmyriad.tools&up_message=https%3A%2F%2Fmyriad.tools&label=website&link=https%3A%2F%2Fmyriad.tools
+
 
 [![Stars][badges/stars]][stars]
 [![Latest Release][badges/lastrel]][lastrel]
 [![Last Modified][badges/lastcom]][lastcom]
 
+[![Website][badge-site]][site]
 [![Discord][badges/disc]][disc]
 
 Myriad is an open-source standardization, functionality, and mitigations test for executors.
