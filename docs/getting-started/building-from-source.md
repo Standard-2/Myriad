@@ -1,5 +1,3 @@
-<!-- markdownlint-disable MD033 -->
-
 # Building From Source
 
 Before doing anything, open a terminal and set its [cd] to the Myriad source repository.
@@ -29,14 +27,14 @@ Myriad uses [ProCMP] for build composition.
 ## Common mistakes
 
 ??? question "How do I get the Myriad source downloaded?"
-    Either download the zip from the [myriad repository] releases page, or if you have `git` just run:
+    Either [:lucide-download: Download source][myriad-source] from the [Myriad Repository][myriad-repository] releases page, or if you have `git` just run:
 
     ```bash
     git clone "https://github.com/Standard-2/Myriad.git"
     ```
 
 ??? question "`#!bash aftman` isn't being recognized in my terminal"
-    It's probably not in your [environment variables]. Add aftman to your PATH and restart your terminal, it won't pick up the change otherwise.
+    It's probably not in your [Environment Variables][environment-variables]. Add aftman to your PATH and restart your terminal, it won't pick up the change otherwise.
 
 ??? question "`#!bash aftman install` isn't doing anything / errors out"
     Make sure your terminal is [cd]'d into the Myriad directory, not just somewhere on your system. aftman looks for `aftman.toml` in the current folder.
