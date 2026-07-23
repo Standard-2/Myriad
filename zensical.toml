@@ -19,6 +19,7 @@ nav = [
   { "Home" = "index.md" },
   { "Getting Started" = [
     "getting-started/index.md",
+    "getting-started/building-from-source.md",
   ] },
   { "API" = [
     "api/index.md",
