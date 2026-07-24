@@ -51,7 +51,7 @@ Myriad uses [ProCMP] for build composition.
 
     If that errors out, aftman installed it but it's not in your PATH yet. Try restarting your terminal first and running it again.
 
-    If it still doesn't work, install darklua manually from the [v0.18.0 release page](https://github.com/seaofvoices/darklua/releases/tag/v0.18.0) and add it to your [environment variables] yourself.
+    If it still doesn't work, install darklua manually from the [v0.18.0 release page](https://github.com/seaofvoices/darklua/releases/tag/v0.18.0) and add it to your [Environment variables][environment-variables] yourself.
 
 ??? question "Build finished but I can't find the output"
     Check `generated/` in the Myriad directory. That's where artifacts are placed after a successful pipeline run.
