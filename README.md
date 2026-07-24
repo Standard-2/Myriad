@@ -22,6 +22,14 @@ After the discontinuation of [UNC][unc], multiple forks and continuations emerge
 
 </div>
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [API](#api)
+- [Brand Assets](#brand-assets)
+- [Contributing](#contributing)
+- [Supporting the Project](#supporting-the-project)
+
 ## Quick Start
 
 ```luau
@@ -53,6 +61,13 @@ end
 >
 > Certain checks in the **Myriad standards test** rely on references that are only accessible within the [Myriad testing game][roblox-game].
 
+## Brand Assets
+
+Myriad's official brand assets are available in the [`assets`][brand-assets] directory. These resources are provided for use in official communications and project materials.
+
+- **Standard2-Logo_BlackBG_WhiteIcon.png** – Standard-2 logo with black background and white icon
+- **Standard2-Logo_NoBG_WhiteIcon.png** – Standard-2 logo with transparent background and white icon
+
 ## Contributing
 
 Contributions are welcome!
@@ -78,6 +93,9 @@ If you'd like to support the project, consider donating via any of these:
 [site]: https://myriad.tools
 [build-docs]: https://docs.myriad.tools/getting-started/building-from-source/
 [api-docs]: https://docs.myriad.tools/api/
+
+<!-- Assets -->
+[brand-assets]: https://github.com/Standard-2/Myriad/tree/main/assets
 
 <!-- External -->
 [disc]: https://discord.gg/nn4NxHU3Pu
