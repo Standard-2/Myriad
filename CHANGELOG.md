@@ -2,6 +2,26 @@
 
 # Changelog
 
+## [1.7.0] - `STABLE`
+
+### Added
+
+- New default (opt-out) setting "Debug Logs" for all test types.
+
+- [Vulnerability test] Added include/exclude test setting.
+
+- [Standards test] Added `setstack` check (Functionality section pending).
+- [Standards test] Added `getrendersteppedlist` check (#15).
+- [Standards test] Added O0/01 & Miscellaneous cases to the `debug.getupvalue` & `debug.getupvalues` checks.
+- [Standards test] Added parented part case to the `cache.iscached` check.
+- [Standards test] Added external bindable case to the `getcallbackvalue` check.
+
+### Changed
+
+- Updated package `Cascade` `1.2.1` -> `1.4.0`.
+
+- [Vulnerability test] Reworked test internally.
+
 ## [1.6.3] - `STABLE`
 
 ### Added
@@ -400,6 +420,9 @@
 
 - Fixed setrawmetatable
 
+<!-- References -->
+
+[1.7.0]: https://github.com/Standard-2/Myriad/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/Standard-2/Myriad/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/Standard-2/Myriad/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/Standard-2/Myriad/compare/v1.6.0...v1.6.1

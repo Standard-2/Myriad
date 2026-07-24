@@ -1,18 +1,21 @@
 return {
 	--// Globals
 	{
+		id = "statsParent",
 		name = "Stats().Parent",
 		getter = function()
 			return Stats().Parent
 		end,
 	},
 	{
+		id = "userSettingsParent",
 		name = "UserSettings().Parent",
 		getter = function()
 			return UserSettings().Parent
 		end,
 	},
 	{
+		id = "settingsParent",
 		name = "settings().Parent",
 		getter = function()
 			return settings().Parent
@@ -21,12 +24,14 @@ return {
 
 	--// GetService
 	{
+		id = "statsServiceParent",
 		name = "GetService(Stats).Parent",
 		getter = function()
 			return game:GetService("Stats").Parent
 		end,
 	},
 	{
+		id = "userGameSettingsServiceParent",
 		name = "GetService(UserGameSettings).Parent",
 		getter = function()
 			return game:GetService("UserGameSettings").Parent
@@ -35,6 +40,7 @@ return {
 
 	--// Instance.new
 	{
+		id = "instanceParentChain",
 		name = "Instance.new(...).Parent -> ...",
 		getter = function()
 			local v = Instance.new("ObjectValue")

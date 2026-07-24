@@ -9,11 +9,9 @@ return function()
 		}
 	end
 
-	--// Functionality test
-
 	--// Alias test
 	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
-		"getstack"
+		"getstack",
 	})
 
 	if not envIndex then
@@ -25,6 +23,6 @@ return function()
 
 	return {
 		status = 200,
-		message = `Passed`,
+		message = message or `Passed`,
 	}
 end

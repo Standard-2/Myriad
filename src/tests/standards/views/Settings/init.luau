@@ -1,6 +1,10 @@
 --!nocheck
 
 return function(name, tab, titledRow, app, testConfig)
+	local cascade = require("@packages/cascade")
+	local config = require("@config")
+	local writefileTest = require("@checks/Filesystem/writefile")
+
 	local pageSection = tab:PageSection({ Title = "Settings", Subtitle = "Configure the standards test" })
 
 	-- Filters
@@ -84,6 +88,43 @@ return function(name, tab, titledRow, app, testConfig)
 	-- Display options
 	do
 		local form = pageSection:Form()
+
+		titledRow(form, "Debug Logs", "Writes detailed standards test lifecycle logs to .myriad/logs.")
+			:Right()
+			:Toggle({
+				Value = config.logging.debugLogs.Value,
+				ValueChanged = function(self, value)
+					if value and not writefile then
+						self.Value = false
+						config.logging.debugLogs.Value = false
+						testConfig.writeDebugLogs = false
+
+						app:Notification({
+							App = "MYRIAD",
+							Title = "Standards test",
+							Subtitle = "Debug Logs: `writefile` is not available. Logging will not occur",
+							Icon = cascade.Symbols.exclamationmarkTriangle,
+						})
+
+						return
+					end
+
+					if value then
+						local success, result = pcall(writefileTest)
+						if not success or result.status ~= 200 then
+							app:Notification({
+								App = "MYRIAD",
+								Title = "Standards test",
+								Subtitle = "Debug Logs: `writefile` test did not pass. Logging may not occur.",
+								Icon = cascade.Symbols.exclamationmarkTriangle,
+							})
+						end
+					end
+
+					config.logging.debugLogs.Value = value
+					testConfig.writeDebugLogs = value
+				end,
+			})
 
 		titledRow(form, "Include Metadata", "Includes metadata in the output. Useful for sharing formatted results.")
 			:Right()

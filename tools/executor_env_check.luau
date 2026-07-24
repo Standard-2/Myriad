@@ -84,6 +84,7 @@ local CHECKS = {
     "getrawmetatable",
     "getreg",
     "getrenderproperty",
+    "getrendersteppedlist",
     "getrenv",
     "getrunningscripts",
     "getscriptbytecode",

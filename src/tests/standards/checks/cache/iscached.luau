@@ -16,11 +16,17 @@ return function()
 
 	--// Functionality test
 	local part = Instance.new("Part")
+	local part2 = Instance.new("Part", game)
 
 	if not cache.iscached(part) then
 		return {
 			status = 500,
 			message = "Cached part assumed uncached"
+		}
+	elseif not cache.iscached(part2) then
+		return {
+			status = 500,
+			message = "Cached part in Workspace assumed uncached"
 		}
 	end
 

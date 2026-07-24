@@ -2,7 +2,7 @@
 --!nolint
 
 return function()
-	if not getinstances then
+	if not getcallbackvalue then
 		return {
 			status = 400,
 			message = "Global not found",
@@ -11,9 +11,14 @@ return function()
 
 	--// Functionality test
 	local r1, r2, r3 = math.random(1, 10), math.random(1, 10), math.random(1, 10)
+	
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local externalBindable = ReplicatedStorage:WaitForChild("BindableFunction")
+
+	local originalRemote = Instance.new("RemoteFunction")
+	
 	local originalBindable1 = Instance.new("BindableFunction")
 	local originalBindable2 = Instance.new("BindableFunction")
-	local originalRemote = Instance.new("RemoteFunction")
 
 	originalBindable1.OnInvoke = function(a, b)
 		return (a + b) ^ r3
@@ -25,6 +30,7 @@ return function()
 	local bindableCb1 = getcallbackvalue(originalBindable1, "OnInvoke")
 	local bindableCb2 = getcallbackvalue(originalBindable2, "OnInvoke")
 	local remoteCb = getcallbackvalue(originalRemote, "OnServerInvoke")
+	local externalBindableCb = getcallbackvalue(externalBindable, "OnInvoke")
 
 	if not bindableCb1 then
 		return {
@@ -50,6 +56,18 @@ return function()
 		return {
 			status = 500,
 			message = "Remote's callback value didn't return the expected value",
+		}
+	elseif not externalBindableCb then
+		return {
+			status = 500,
+			message = "Didn't return a callback value for a external bindable",
+		}
+	elseif externalBindableCb() ~= tostring(externalBindableCb) or
+		debug.info(externalBindableCb, "n") ~= "Callback" then
+		
+		return {
+			status = 500,
+			message = "External bindable's callback value is not the expected function",
 		}
 	end
 

@@ -1,68 +1,88 @@
 local blocklist = require("@self/blocklist")
+local result = require("@vulnerabilities/result")
 
-return function(output, config, isVulnerable, utils)
-	local stats = { checked = 0, secured = 0, vulnerable = 0 }
-	local printc = utils.printc
-	local warnc = utils.warnc
-	local uni = utils.uni
-	local statusCodes = utils.statusCodes
+local function getPseudoTarget(data)
+	return data.Target
+end
 
-	local function checkMethods(containerName, container, methods)
-		for _, method in ipairs(methods) do
-			stats.checked += 1
-
-			local exists, func = pcall(function()
-				return container[method]
-			end)
-
-			if exists and func then
-				local isVuln, msg = isVulnerable(func, container)
-
-				if isVuln then
-					stats.vulnerable += 1
-					warnc(`{uni.bullet} {statusCodes[400]} {method}: {msg}`)
-				else
-					stats.secured += 1
-					if config.showSafe then
-						printc(`{uni.bullet} {statusCodes[200]} {method}: {msg}`)
-					end
-				end
-			else
-				stats.secured += 1
-				if config.showSafe then
-					printc(`{uni.bullet} {statusCodes[200]} {method}: Not found (Safe)`)
-				end
-			end
-
-			if config.checkpointDelay > 0 then
-				task.wait(config.checkpointDelay)
-			end
-		end
+local function getServiceTarget(serviceName)
+	local success, service = pcall(game.GetService, game, serviceName)
+	if success then
+		return service
 	end
 
+	return nil
+end
+
+local function test(id, category, targetName, methodName, getTarget)
+	return {
+		id = id,
+		name = `{targetName}.{methodName}`,
+		category = category,
+		run = function()
+			local target = getTarget()
+			if target == nil then
+				return result.ambiguous("Target is unavailable")
+			end
+
+			local exists, method = pcall(function()
+				return target[methodName]
+			end)
+
+			if not exists or type(method) ~= "function" then
+				return result.secured("Method is not exposed")
+			end
+
+			local success = pcall(method, target)
+			if success then
+				return result.vulnerable("Method executed without a permission block")
+			end
+
+			return result.secured("Method rejected direct invocation")
+		end,
+	}
+end
+
+return function()
+	local checks = {}
+
 	if blocklist._pseudo then
-		printc(`\nChecking Pseudo Targets`)
-		for name, data in pairs(blocklist._pseudo) do
-			if data.Target then
-				checkMethods(name, data.Target, data.Methods)
-			else
-				warnc(`{uni.bullet} {statusCodes[404]} {name}: Target Instance missing`)
+		for targetName, data in pairs(blocklist._pseudo) do
+			for _, methodName in ipairs(data.Methods) do
+				table.insert(
+					checks,
+					test(
+						`services.pseudo.{targetName}.{methodName}`,
+						"Pseudo Targets",
+						targetName,
+						methodName,
+						function()
+							return getPseudoTarget(data)
+						end
+					)
+				)
 			end
 		end
 	end
 
 	if blocklist.Services then
-		printc(`\nChecking Standard Services`)
 		for serviceName, methods in pairs(blocklist.Services) do
-			local success, service = pcall(game.GetService, game, serviceName)
-
-			if success and service then
-				checkMethods(serviceName, service, methods)
-			else
-				warnc(`{uni.bullet} {statusCodes[404]} {serviceName}: Service missing`)
+			for _, methodName in ipairs(methods) do
+				table.insert(
+					checks,
+					test(
+						`services.{serviceName}.{methodName}`,
+						"Standard Services",
+						serviceName,
+						methodName,
+						function()
+							return getServiceTarget(serviceName)
+						end
+					)
+				)
 			end
 		end
 	end
 
-	return stats
+	return checks
 end

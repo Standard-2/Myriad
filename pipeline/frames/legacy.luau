@@ -12,7 +12,7 @@
     This file was automatically @generated with ProCMP, it is not intended for manual editing.
 --]]
 
-warn("Using a legacy route\n(Use <release>/myriad.luau instead of <release/pre.luau/release.luau etc)")
+warn("Using a legacy deployment\nThe new deployment is <tag>/myriad.luau instead of <tag>/pre.luau & <tag>/release.luau etc")
 
 _P = {
 	genDate = __COMPOSER.Insert(__COMPOSER.genDate),

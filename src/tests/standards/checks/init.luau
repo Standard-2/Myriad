@@ -38,6 +38,7 @@ return {
 		["debug.getupvalue"] = require("@checks/debug/getupvalue.luau"),
 		["debug.getupvalues"] = require("@checks/debug/getupvalues.luau"),
 		["debug.getstack"] = require("@checks/debug/getstack.luau"),
+		["debug.setstack"] = require("@checks/debug/setstack.luau"),
 		["debug.setconstant"] = require("@checks/debug/setconstant.luau"),
 		["debug.setupvalue"] = require("@checks/debug/setupvalue.luau"),
 	},
@@ -156,6 +157,7 @@ return {
 		["getthreadidentity"] = require("@checks/Reflection/getthreadidentity.luau"),
 		["setscriptable"] = require("@checks/Reflection/setscriptable.luau"),
 		["isscriptable"] = require("@checks/Reflection/isscriptable.luau"),
+		["getrendersteppedlist"] = require("@checks/Reflection/getrendersteppedlist.luau"),
 	},
 
 	Scripts = {

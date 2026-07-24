@@ -1,6 +1,13 @@
 local valueState = require("@modules/valueState")
 
 return {
+	logging = {
+		debugLogs = valueState.new(true),
+		rootDirectory = ".myriad",
+		logDirectory = ".myriad/logs",
+		logExtension = "log",
+	},
+
 	keybinds = {
 		toggleMenu = valueState.new({ Enum.KeyCode.RightControl }),
 		runStandardsTest = valueState.new({ "Control", "Shift", "S" }),

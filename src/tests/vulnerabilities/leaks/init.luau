@@ -1,75 +1,87 @@
-return function(output, config, isVulnerable, utils)
-	local stats = { checked = 0, secured = 0, vulnerable = 0 }
-	local printc = utils.printc
-	local warnc = utils.warnc
-	local uni = utils.uni
-	local statusCodes = utils.statusCodes
+local result = require("@vulnerabilities/result")
 
-	local function runAuthTest(name, func, argsArray)
-		stats.checked += 1
-		local success, result = pcall(function()
-			return func(table.unpack(argsArray))
-		end)
+local TEST_URL = "https://economy.roblox.com/v1/user/currency"
 
-		if not success then
-			stats.secured += 1
-			if config.showSafe then
-				printc(`{uni.bullet} {statusCodes[200]} {name}: Blocked Roblox API request (Safe)`)
+local function requestCall(func, url)
+	return func({ Url = url })
+end
+
+local function urlCall(func, url)
+	return func(url)
+end
+
+local function getResponseBody(response)
+	if type(response) == "table" and response.Body ~= nil then
+		return tostring(response.Body)
+	end
+
+	return tostring(response)
+end
+
+local function containsAuthenticatedCurrencyResponse(body)
+	return body:find('"robux"', 1, true) ~= nil or body:find('"isPremium"', 1, true) ~= nil
+end
+
+local function test(id, name, getFunc, call)
+	return {
+		id = id,
+		name = name,
+		category = "Roblox Auth Leaks",
+		run = function()
+			local func = getFunc()
+			if type(func) ~= "function" then
+				return result.secured("API is not exposed")
 			end
-		else
-			local resp = tostring(result)
-			if type(result) == "table" and result.Body then
-				resp = tostring(result.Body)
+
+			local success, response = pcall(call, func, TEST_URL)
+			if not success then
+				return result.secured("Roblox API request was rejected")
 			end
 
-			if resp:find('"robux"') or resp:find('"isPremium"') then
-				stats.vulnerable += 1
-				warnc(`{uni.bullet} {statusCodes[400]} {name}: VULNERABLE to Roblox API Auth Leak (Cookies are sent!)`)
-			else
-				stats.secured += 1
-				if config.showSafe then
-					printc(`{uni.bullet} {statusCodes[200]} {name}: Allows Roblox API but strips Auth (Safe)`)
-				end
+			local body = getResponseBody(response)
+			if containsAuthenticatedCurrencyResponse(body) then
+				return result.vulnerable("Roblox API response included authenticated currency data")
 			end
-		end
 
-		if config.checkpointDelay > 0 then
-			task.wait(config.checkpointDelay)
-		end
-	end
+			return result.secured("Roblox API response did not include authenticated account data")
+		end,
+	}
+end
 
-	local env = getgenv and getgenv()
-	local testUrl = "https://economy.roblox.com/v1/user/currency"
+return function()
+	local env = getgenv and getgenv() or _G
 
-	printc(`\nChecking Auth Leak Vulnerabilities`)
+	return {
+		test("leaks.request.auth", "request strips Roblox auth", function()
+			return env.request
+		end, requestCall),
 
-	if type(env.request) == "function" then
-		runAuthTest("request (Auth)", env.request, { { Url = testUrl } })
-	end
+		test("leaks.http_request.auth", "http_request strips Roblox auth", function()
+			return env.http_request
+		end, requestCall),
 
-	if type(env.http_request) == "function" then
-		runAuthTest("http_request (Auth)", env.http_request, { { Url = testUrl } })
-	end
+		test("leaks.http.request.auth", "http.request strips Roblox auth", function()
+			return type(env.http) == "table" and env.http.request or nil
+		end, requestCall),
 
-	if type(env.http) == "table" and type(env.http.request) == "function" then
-		runAuthTest("http.request (Auth)", env.http.request, { { Url = testUrl } })
-	end
+		test("leaks.HttpGet.auth", "HttpGet strips Roblox auth", function()
+			return env.HttpGet
+		end, urlCall),
 
-	if type(env.HttpGet) == "function" then
-		runAuthTest("HttpGet (Auth)", env.HttpGet, { testUrl })
-	end
+		test("leaks.HttpGetAsync.auth", "HttpGetAsync strips Roblox auth", function()
+			return env.HttpGetAsync
+		end, urlCall),
 
-	if type(env.HttpGetAsync) == "function" then
-		runAuthTest("HttpGetAsync (Auth)", env.HttpGetAsync, { testUrl })
-	end
+		test("leaks.game.HttpGet.auth", "game:HttpGet strips Roblox auth", function()
+			return game.HttpGet
+		end, function(_, url)
+			return game:HttpGet(url)
+		end),
 
-	runAuthTest("game:HttpGet (Auth)", function(url)
-		return game:HttpGet(url)
-	end, { testUrl })
-
-	runAuthTest("game:HttpGetAsync (Auth)", function(url)
-		return game:HttpGetAsync(url)
-	end, { testUrl })
-
-	return stats
+		test("leaks.game.HttpGetAsync.auth", "game:HttpGetAsync strips Roblox auth", function()
+			return game.HttpGetAsync
+		end, function(_, url)
+			return game:HttpGetAsync(url)
+		end),
+	}
 end

@@ -238,6 +238,23 @@ export type ComponentProperties = {
 
 export type ComponentContext = ComponentProperties & Components
 
+-- App dumps
+export type AppDumpOptions = {
+	IncludeInstanceProperties: boolean?,
+	IncludeInstanceTree: boolean?,
+	Reset: boolean?,
+}
+
+export type AppRecorder = {
+	Active: boolean,
+	App: App,
+
+	Start: (self: AppRecorder, options: AppDumpOptions?) -> AppRecorder,
+	Stop: (self: AppRecorder) -> AppRecorder,
+	Clear: (self: AppRecorder) -> AppRecorder,
+	Dump: (self: AppRecorder, options: AppDumpOptions?) -> string,
+}
+
 -- Window
 export type WindowProperties = Frame & {
 	Searching: boolean?,
@@ -412,10 +429,23 @@ export type RadioButtonGroup = BaseComponent & Components & RadioButtonGroupProp
 	Option: (Name: string?) -> Frame,
 }
 
+-- DropdownMenu
+export type DropdownMenuAnchorConfig = {
+	Object: GuiObject?,
+	Element: GuiObject?,
+	Label: GuiObject?,
+	Option: number?,
+	Offset: Vector2?,
+	XOffset: number?,
+	YOffset: number?,
+}
+export type DropdownMenuAnchor = GuiObject | DropdownMenuAnchorConfig
+
 -- PopUpButton
 export type PopUpButtonProperties = Frame & {
 	Options: { [number]: string }?,
 	Expanded: boolean?,
+	Anchor: DropdownMenuAnchor?,
 	Maximum: number?,
 	Value: (number | { number })?,
 	ValueChanged: ((self: PopUpButton, value: number | { number }) -> unknown)?,
@@ -430,6 +460,7 @@ export type PopUpButton = BaseComponent & Components & PopUpButtonProperties & {
 export type PullDownButtonProperties = Frame & {
 	Options: { [number]: string }?,
 	Expanded: boolean?,
+	Anchor: DropdownMenuAnchor?,
 	Label: string?,
 	Value: number?,
 	ValueChanged: ((self: PullDownButton, value: number) -> unknown)?,
@@ -455,6 +486,16 @@ export type Notification = BaseComponent & Components & NotificationProperties &
 	Close: (self: Notification) -> nil,
 }
 
+-- ImageSurface
+export type ImageSurfaceProperties = Frame & {
+	Image: string?,
+	ImageColor: Color3?,
+	SurfaceColor: Color3?,
+	Gradient: boolean?,
+}
+
+export type ImageSurface = BaseComponent & Components & ImageSurfaceProperties
+
 -- Export
 export type Components = {
 	Window: (self: any, properties: WindowProperties?) -> Window,
@@ -479,6 +520,7 @@ export type Components = {
 	PopUpButton: (self: any, properties: PopUpButtonProperties) -> PopUpButton,
 	PullDownButton: (self: any, properties: PullDownButtonProperties) -> PullDownButton,
 	Notification: (self: any, properties: NotificationProperties) -> Notification,
+	ImageSurface: (self: any, properties: ImageSurfaceProperties) -> ImageSurface,
 }
 
 return 1

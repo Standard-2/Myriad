@@ -11,10 +11,12 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local crypt = require("@dependencies/crypt/crypt")
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
+	local debugLogger = require("@modules/debugLogger")
 
 	--// Variables
 	local copyButton = nil
 	local currentTask = nil
+	local currentLogger = nil
 	local output = nil
 	local testingState = nil
 	local lastEntreePerGroup = {}
@@ -30,6 +32,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 		excludedTests = "",
 		includedTests = "",
 		testTimeout = 8,
+		writeDebugLogs = config.logging.debugLogs.Value,
 	}
 
 	local uni = {
@@ -51,13 +54,24 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 	local function test()
 		if currentTask then
+			if currentLogger then
+				currentLogger:finish("Standards test cancelled by a new run")
+			end
+
 			task.cancel(currentTask)
 		end
 
 		currentTask = task.spawn(function()
+			local logger = debugLogger.new(testConfig.writeDebugLogs)
+			currentLogger = logger
+			logger:start()
+			logger:write("User started standards test")
+
 			tab.Selected = true
+			logger:write("Selected standards tab")
 
 			if testingState then
+				logger:write("Initializing testing state")
 				testingState.Visible = true
 				testingState.Passed = 0
 				testingState.Failed = 0
@@ -68,6 +82,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			end
 
 			if output then
+				logger:write("Hiding previous output")
 				output.__instance.Visible = false
 			end
 			if copyButton then
@@ -101,9 +116,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			local failed = 0
 			local numStandards = 0
 			local excludedCount = 0
+			logger:write("Initialized standards counters")
 
 			local exclusions = {}
 			if testConfig.excludedTests and testConfig.excludedTests ~= "" then
+				logger:write(`Parsing excluded tests: {testConfig.excludedTests}`)
 				for _, ex in ipairs(string.split(testConfig.excludedTests, ",")) do
 					exclusions[ex:gsub("^%s*(.-)%s*$", "%1")] = true
 				end
@@ -112,6 +129,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			local inclusions = {}
 			local hasInclusions = false
 			if testConfig.includedTests and testConfig.includedTests ~= "" then
+				logger:write(`Parsing included tests: {testConfig.includedTests}`)
 				hasInclusions = true
 				for _, inc in ipairs(string.split(testConfig.includedTests, ",")) do
 					inclusions[inc:gsub("^%s*(.-)%s*$", "%1")] = true
@@ -121,6 +139,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			for groupName, group in checks do
 				lastEntreePerGroup[groupName] = nil
 				results[groupName] = {}
+				logger:write(`Initializing result group: {groupName}`)
 
 				for name in group do
 					numStandards += 1
@@ -138,25 +157,31 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					})
 				end
 			end
+			logger:write(`Flattened {#flattened} standards tests`)
 
 			for i, entry in ipairs(flattened) do
 				local groupName = entry.groupName
 				local name = entry.name
 				local test = entry.test
+				local testId = `{groupName}.{name}`
 
 				if exclusions[groupName] or exclusions[name] or exclusions[groupName .. "." .. name] then
 					excludedCount += 1
+					logger:write(`Skipped test: {testId}, reason: excluded`)
 					continue
 				end
 
 				if hasInclusions then
 					if not (inclusions[groupName] or inclusions[name] or inclusions[groupName .. "." .. name]) then
 						excludedCount += 1
+						logger:write(`Skipped test: {testId}, reason: not included`)
 						continue
 					end
 				end
 
 				local nextEntry = flattened[i + 1]
+				local nextTestId = nextEntry and `{nextEntry.groupName}.{nextEntry.name}` or "None"
+				logger:write(`Running test: {testId}, next test: {nextTestId}`)
 
 				if testingState then
 					testingState.CurrentTest = name
@@ -187,6 +212,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						task.cancel(thread)
 						success = false
 						result = `Timed out after {testConfig.testTimeout}s`
+						logger:write(`Test timed out: {testId}, timeout: {testConfig.testTimeout}s`)
 					end
 				end
 
@@ -206,6 +232,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					message = result.message
 					failed += 1
 				end
+				logger:write(
+					`Ran test: {testId}, result: {status}, message: {message}, elapsed: {checkElapsed}s, next test: {nextTestId}`
+				)
 
 				if testingState then
 					testingState.Passed = passed
@@ -215,6 +244,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				end
 
 				if testConfig.checkpointDelay ~= 0 then
+					logger:write(`Waiting checkpoint delay: {testConfig.checkpointDelay}s`)
 					task.wait(testConfig.checkpointDelay)
 				end
 
@@ -227,9 +257,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			end
 
 			if testingState then
+				logger:write("Finished running standards tests")
 				testingState.Visible = false
 			end
 			if output then
+				logger:write("Showing output console")
 				output.__instance.Visible = true
 				output:Clear()
 			end
@@ -256,6 +288,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			end
 
 			for groupName, groupResults in results do
+				logger:write(`Rendering output group: {groupName}`)
 				local includesFilter = false
 				local groupProcessed = false
 
@@ -277,9 +310,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			end
 
 			if testConfig.stripRichtext then
+				logger:write("Stripping richtext from output")
 				output:SetValue(output:GetValue():gsub("<br%s*/>", "\n"):gsub("<[^<>]->", ""))
 			end
 			if testConfig.formatDiff then -- Why is GPT so goated
+				logger:write("Formatting output as diff")
 				output:SetValue(output:GetValue():gsub("<br%s*/>", "\n"):gsub("<[^<>]->", ""))
 				local input = output:GetValue()
 				local lines = {}
@@ -311,6 +346,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
 			local executor, executorVers = identifyexecutor()
+			logger:write(
+				`Finished standards test. Took: {endTime}s, executor: {executor or "Unknown"}, version: {executorVers or "Unknown"}, tested: {numStandards - excludedCount}, passed: {passed}, failed: {failed}`
+			)
 
 			printc(`Summary:`)
 			printc(`{uni.bullet} Took: {endTime}s`)
@@ -325,6 +363,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			end
 
 			if testConfig.includeMetadata then
+				logger:write("Adding metadata to output")
 				local input = output:GetValue()
 
 				local metadata = string.format(
@@ -337,12 +376,13 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				output:SetValue(metadata .. input)
 			end
 
-			local signatureId = ""
+			--[[ local signatureId = ""
 			local challenge = ""
 			local headers = ""
 			local resultHash = ""
 
 			pcall(function()
+				logger:write("Requesting result signature")
 				local ReqFunc = request or http_request or (http and http.request)
 				if ReqFunc then
 					local response = ReqFunc({
@@ -358,10 +398,12 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						headers = data.obfuscatedHeaders
 
 						resultHash = crypt.hash(HttpService:JSONEncode(results) .. challenge)
+						logger:write(`Generated result signature: {signatureId}`)
 					end
 				end
 			end)
 
+			logger:write("Submitting standards results")
 			gameRefs.res:FireServer("s", results, {
 				["testBuildMetadata"] = _P,
 				["executor"] = executor,
@@ -372,11 +414,28 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				["testTime"] = endTime,
 				["generated"] = DateTime.now():ToIsoDate(),
 				["excludedCount"] = excludedCount,
-			}, signatureId, headers, resultHash)
+			}, signatureId, headers, resultHash) ]]
+
+			logger:finish("Standards test complete")
+			if logger.path and not logger.writeFailure then
+				app:Notification({
+					App = "MYRIAD",
+					Title = "Debug log finalized",
+					Subtitle = `Saved to {logger:getWorkspacePath()}`,
+					Icon = cascade.Symbols.docText,
+				})
+			end
+			currentLogger = nil
 		end)
 	end
 
 	--// Initialize
+	do -- About
+		local form = tab:Form()
+
+		titledRow(form, "Scope", "Formally named 'Myriad Environment Specification'. It is an adaptation of the original UNC standard specification.")
+	end
+
 	do -- Test Options
 		local form = tab:PageSection({ Title = "Test Options", Subtitle = "Configure the tests" }):Form()
 
