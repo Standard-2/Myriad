@@ -5,8 +5,8 @@
 -- https://docs.myriad.tools/spec/File%20Dialog/savefiledialog/
 
 --[[
-	Example
-	
+	Example (ONLY reference the docs above for all methods and properties.)
+
 	```luau
 		print("Save your config")
 
