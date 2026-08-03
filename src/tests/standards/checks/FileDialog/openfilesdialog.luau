@@ -2,7 +2,7 @@
 --!nolint
 
 -- Please reference our manual tests to properly verify your implementation.
--- https://github.com/Standard-2/Myriad/issues/18
+-- https://docs.myriad.tools/spec/File%20Dialog/openfilesdialog/
 return function()
 	if not openfilesdialog then
 		return {
