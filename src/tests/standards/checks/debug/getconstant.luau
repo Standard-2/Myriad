@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 
-function a()
+return function()
 	if not debug or not debug.getconstant then
 		return {
 			status = 400,
@@ -20,7 +20,7 @@ function a()
 		Date.now()
 	end
 
-	local constOrder = { -- Optimization levels make the order essentially useless. So we instead check if the expected constants exist.
+	local constOrder = {
 		"print",
 		"A",
 		"tostring",
@@ -37,7 +37,10 @@ function a()
 			break
 		end
 
-		constants[index] = const
+		if const ~= nil then
+			constants[#constants + 1] = const
+		end
+
 		index += 1
 	end
 
@@ -45,7 +48,7 @@ function a()
 		if not table.find(constants, v) then
 			return {
 				status = 500,
-				message = `Expected constant wasn't found: {v}`,
+				message = `Expected constant was not found: {v}`,
 			}
 		end
 	end
@@ -61,6 +64,18 @@ function a()
 		return {
 			status = 500,
 			message = "Should error with C closures",
+		}
+	end
+
+	--// Alias test
+	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+		"getconstant",
+	})
+
+	if not envIndex then
+		return {
+			status = 501,
+			message = `Alias not found: {failedIndex}`,
 		}
 	end
 
