@@ -103,13 +103,26 @@ return function()
 	pFlag, pI, pV = false, 0, nil
 	p2Flag, p2I = false, 0
 
-	local function opt1Function()
-		local _8, _7, _6, _5, _4, _3, _2, _1 = Up8, Up7, Up6, Up5, Up4, Up3, Up2, Up1
-		local function protoFunction()
-			local _10 = Up10
+	local opt1Function = loadstring([[
+		--!optimize 1
+		local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 = ...
+		local function originalFunction()
+			local _8, _7, _6, _5, _4, _3, _2, _1 = Up8, Up7, Up6, Up5, Up4, Up3, Up2, Up1
+			local function protoFunction()
+				local _10 = Up10
+			end
+
+			return function() end
 		end
 
-		return function() end
+		return originalFunction
+	]], "=MYRIAD-getupvalues-opt1")(Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, _G)
+
+	if type(opt1Function) ~= "function" then
+		return {
+			status = 500,
+			message = "[!optimize 1] - Failed to compile test function with loadstring",
+		}
 	end
 
 	local opt1upvaluesOrder = {
