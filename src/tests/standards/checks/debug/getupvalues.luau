@@ -2,7 +2,7 @@
 --!nolint
 
 return function()
-	if not debug or not debug.getupvalue then
+	if not debug or not debug.getupvalues then
 		return {
 			status = 400,
 			message = "Global not found",
@@ -17,7 +17,6 @@ return function()
 	--// Functionality test
 	local pFlag, pI, pV = false, 0, nil
 	local p2Flag, p2I = false, 0
-	local p3Flag, p3I = false, 0
 
 	local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 =
 		time(), "Myriad", newproxy(), {}, game, newproxy(), Enum, warn, print, workspace
@@ -37,7 +36,7 @@ return function()
 		end
 
 		return originalFunction
-	]], "=MYRIAD-getupvalue")(Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, _G)
+	]], "=MYRIAD-getupvalues")(Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, _G)
 
 	if type(opt0Function) ~= "function" then
 		return {
@@ -58,17 +57,12 @@ return function()
 		Up9,
 	}
 
-	local opt0upvalues = {}
-	local index = 1
-
-	while true do
-		local Success, Value = pcall(debug.getupvalue, opt0Function, index)
-		if not Success then
-			break
-		end
-
-		opt0upvalues[index] = Value
-		index += 1
+	local opt0upvalues = debug.getupvalues(opt0Function)
+	if type(opt0upvalues) ~= "table" then
+		return {
+			status = 500,
+			message = "[!optimize 0] - debug.getupvalues did not return a table",
+		}
 	end
 
 	for i, v in ipairs(opt0upvaluesOrder) do
@@ -104,16 +98,10 @@ return function()
 			status = 500,
 			message = `[!optimize 0] - Upvalue count is not {#opt0upvaluesOrder}, it's {#opt0upvalues}`,
 		}
-	elseif pcall(debug.getupvalue, opt0Function, index) then
-		return {
-			status = 500,
-			message = `[!optimize 0] - Index {index} should return an error, it doesn't exist.`,
-		}
 	end
 
 	pFlag, pI, pV = false, 0, nil
 	p2Flag, p2I = false, 0
-	p3Flag, p3I = false, 0
 
 	local function opt1Function()
 		local _8, _7, _6, _5, _4, _3, _2, _1 = Up8, Up7, Up6, Up5, Up4, Up3, Up2, Up1
@@ -136,17 +124,12 @@ return function()
 		Up10,
 	}
 
-	local opt1upvalues = {}
-	index = 1
-
-	while true do
-		local Success, Value = pcall(debug.getupvalue, opt1Function, index)
-		if not Success then
-			break
-		end
-
-		opt1upvalues[index] = Value
-		index += 1
+	local opt1upvalues = debug.getupvalues(opt1Function)
+	if type(opt1upvalues) ~= "table" then
+		return {
+			status = 500,
+			message = "[!optimize 1] - debug.getupvalues did not return a table",
+		}
 	end
 
 	for i, v in ipairs(opt1upvaluesOrder) do
@@ -182,17 +165,19 @@ return function()
 			status = 500,
 			message = `[!optimize 1] - Upvalue count is not {#opt1upvaluesOrder}, it's {#opt1upvalues}`,
 		}
-	elseif pcall(debug.getupvalue, opt1Function, index) then
+	end
+
+	local function noUpvalues()
+		return "MYRIAD_NO_UPVALUES"
+	end
+
+	local emptyValues = debug.getupvalues(noUpvalues)
+	if type(emptyValues) ~= "table" or next(emptyValues) ~= nil then
 		return {
 			status = 500,
-			message = `[!optimize 1] - Index {index} should return an error, it doesn't exist.`,
+			message = "Function with no upvalues should return an empty table",
 		}
-	elseif pcall(debug.getupvalue, opt1Function, 0) then
-		return {
-			status = 500,
-			message = "Should error when retrieving invalid upvalue indexes",
-		}
-	elseif pcall(debug.getupvalue, print, 1) then
+	elseif pcall(debug.getupvalues, print) then
 		return {
 			status = 500,
 			message = "Should error with C closures",
@@ -201,7 +186,7 @@ return function()
 
 	--// Alias test
 	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
-		"getupvalue",
+		"getupvalues",
 	})
 
 	if not envIndex then
