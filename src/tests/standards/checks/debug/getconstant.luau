@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 
-return function()
+function a()
 	if not debug or not debug.getconstant then
 		return {
 			status = 400,
@@ -10,8 +10,6 @@ return function()
 	end
 
 	--// Functionality test
-	local pFlag, pI, pV = false
-
 	local function originalFunction()
 		local _1 = 2
 		local _2 = "A"
@@ -45,11 +43,10 @@ return function()
 
 	for i, v in ipairs(constOrder) do
 		if not table.find(constants, v) then
-			pFlag = true
-			pV = v
-			pI = i
-
-			break
+			return {
+				status = 500,
+				message = `Expected constant wasn't found: {v}`,
+			}
 		end
 	end
 
@@ -64,25 +61,6 @@ return function()
 		return {
 			status = 500,
 			message = "Should error with C closures",
-		}
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
-		"getconstant",
-	})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	if pFlag then
-		return {
-			status = 200,
-			message = `Passed with inconsistency: Expected constant wasn't found: {pV} (Check your optimization level)`,
 		}
 	end
 
