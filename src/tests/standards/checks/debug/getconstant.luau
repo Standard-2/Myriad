@@ -22,28 +22,38 @@ return function()
 		Date.now()
 	end
 
-	local constOrder = { -- Optimization levels make this essentially useless. So we instead pass with inconsistency warnings, we could do a optimization check but eh.
-		[1] = "print",
-
-		[3] = "A",
-		[4] = "tostring",
-
-		[6] = "Date",
-		[7] = "now",
+	local constOrder = { -- Optimization levels make the order essentially useless. So we instead check if the expected constants exist.
+		"print",
+		"A",
+		"tostring",
+		"Date",
+		"now",
 	}
 
+	local constants = {}
+	local index = 1
+
+	while true do
+		local success, const = pcall(debug.getconstant, originalFunction, index)
+		if not success then
+			break
+		end
+
+		constants[index] = const
+		index += 1
+	end
+
 	for i, v in ipairs(constOrder) do
-		local const = debug.getconstant(originalFunction, i)
-		if const ~= v then
+		if not table.find(constants, v) then
 			pFlag = true
 			pV = v
 			pI = i
-		end
 
-		constOrder[i] = const
+			break
+		end
 	end
 
-	local invalidIndexSuccess, _ = pcall(debug.getconstant, originalFunction, 20)
+	local invalidIndexSuccess, _ = pcall(debug.getconstant, originalFunction, index)
 
 	if invalidIndexSuccess then
 		return {
@@ -72,7 +82,7 @@ return function()
 	if pFlag then
 		return {
 			status = 200,
-			message = `Passed with inconsistency:  Constant at {pI} should be: {pV}. Got: {constOrder[pI]} (Check your optimization level)`,
+			message = `Passed with inconsistency: Expected constant wasn't found: {pV} (Check your optimization level)`,
 		}
 	end
 
