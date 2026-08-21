@@ -51,6 +51,11 @@ return function()
 			status = 500,
 			message = "Hidden property value incorrect in workspace",
 		}
+	elseif not prop4Success then
+		return {
+			status = 500,
+			message = "Failed to get Write-only hidden property",
+		}
 	elseif not prop4Hidden then
 		return {
 			status = 500,
