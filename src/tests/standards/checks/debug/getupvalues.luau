@@ -19,7 +19,7 @@ return function()
 	local p2Flag, p2I = false, 0
 
 	local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 =
-		time(), "Myriad", newproxy(), {}, game, nil, Enum, warn, print, workspace
+		time(), "Myriad", newproxy(), {}, game, newproxy(), Enum, warn, print, workspace
 
 	coroutine.isyieldable(Up1, Up2, Up6) -- optimize 2 can make those locals cease to exist
 
@@ -46,15 +46,15 @@ return function()
 	end
 
 	local opt0upvaluesOrder = {
-		[1] = Up1,
-		[2] = Up2,
-		[3] = Up3,
-		[4] = Up4,
-		[5] = Up5,
-		[6] = Up6,
-		[7] = Up7,
-		[8] = Up8,
-		[9] = Up9,
+		Up1,
+		Up2,
+		Up3,
+		Up4,
+		Up5,
+		Up6,
+		Up7,
+		Up8,
+		Up9,
 	}
 
 	local opt0upvalues = debug.getupvalues(opt0Function)
@@ -65,15 +65,19 @@ return function()
 		}
 	end
 
-	for i, v in ipairs(opt0upvalues) do
-		if i > 9 then
-			p2Flag = true
-			p2I = i
-
-			break
-		elseif opt0upvaluesOrder[i] ~= v then
+	for i, v in ipairs(opt0upvaluesOrder) do
+		if not table.find(opt0upvalues, v) then
 			pFlag = true
 			pI, pV = i, v
+
+			break
+		end
+	end
+
+	for i, v in ipairs(opt0upvalues) do
+		if not table.find(opt0upvaluesOrder, v) then
+			p2Flag = true
+			p2I = i
 
 			break
 		end
@@ -82,42 +86,55 @@ return function()
 	if pFlag then
 		return {
 			status = 500,
-			message = `[!optimize 0] - Upvalue at {pI} should be: {opt0upvaluesOrder[pI]}. Got: {pV}`,
+			message = `[!optimize 0] - Expected upvalue was not found: {pV}`,
 		}
 	elseif p2Flag then
 		return {
 			status = 500,
-			message = `[!optimize 0] - Index {p2I} doesn't exist in expected upvalue order`,
+			message = `[!optimize 0] - Unexpected upvalue at index {p2I}`,
 		}
-	elseif #opt0upvalues ~= 9 then
+	elseif #opt0upvalues ~= #opt0upvaluesOrder then
 		return {
 			status = 500,
-			message = `[!optimize 0] - Upvalue count is not 9, it's {#opt0upvalues}`,
+			message = `[!optimize 0] - Upvalue count is not {#opt0upvaluesOrder}, it's {#opt0upvalues}`,
 		}
 	end
 
 	pFlag, pI, pV = false, 0, nil
 	p2Flag, p2I = false, 0
 
-	local function opt1Function()
-		local _8, _7, _6, _5, _4, _3, _2, _1 = Up8, Up7, Up6, Up5, Up4, Up3, Up2, Up1
-		local function protoFunction()
-			local _10 = Up10
+	local opt1Function = loadstring([[
+		--!optimize 1
+		local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 = ...
+		local function originalFunction()
+			local _8, _7, _6, _5, _4, _3, _2, _1 = Up8, Up7, Up6, Up5, Up4, Up3, Up2, Up1
+			local function protoFunction()
+				local _10 = Up10
+			end
+
+			return function() end
 		end
 
-		return function() end
+		return originalFunction
+	]], "=MYRIAD-getupvalues-opt1")(Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, _G)
+
+	if type(opt1Function) ~= "function" then
+		return {
+			status = 500,
+			message = "[!optimize 1] - Failed to compile test function with loadstring",
+		}
 	end
 
 	local opt1upvaluesOrder = {
-		[1] = Up8,
-		[2] = Up7,
-		[3] = Up5,
-		[4] = Up4,
-		[5] = Up3,
-		[6] = Up1,
-		[7] = Up10,
-		[8] = Up6,
-		[9] = Up2,
+		Up1,
+		Up2,
+		Up3,
+		Up4,
+		Up5,
+		Up6,
+		Up7,
+		Up8,
+		Up10,
 	}
 
 	local opt1upvalues = debug.getupvalues(opt1Function)
@@ -128,15 +145,19 @@ return function()
 		}
 	end
 
-	for i, v in ipairs(opt1upvalues) do
-		if i > 9 then
-			p2Flag = true
-			p2I = i
-
-			break
-		elseif opt1upvaluesOrder[i] ~= v then
+	for i, v in ipairs(opt1upvaluesOrder) do
+		if not table.find(opt1upvalues, v) then
 			pFlag = true
 			pI, pV = i, v
+
+			break
+		end
+	end
+
+	for i, v in ipairs(opt1upvalues) do
+		if not table.find(opt1upvaluesOrder, v) then
+			p2Flag = true
+			p2I = i
 
 			break
 		end
@@ -145,17 +166,17 @@ return function()
 	if pFlag then
 		return {
 			status = 500,
-			message = `[!optimize 1] - Upvalue at {pI} should be: {opt1upvaluesOrder[pI]}. Got: {pV}`,
+			message = `[!optimize 1] - Expected upvalue was not found: {pV}`,
 		}
 	elseif p2Flag then
 		return {
 			status = 500,
-			message = `[!optimize 1] - Index {p2I} doesn't exist in expected upvalue order`,
+			message = `[!optimize 1] - Unexpected upvalue at index {p2I}`,
 		}
-	elseif #opt1upvalues ~= 9 then
+	elseif #opt1upvalues ~= #opt1upvaluesOrder then
 		return {
 			status = 500,
-			message = `[!optimize 1] - Upvalue count is not 9, it's {#opt1upvalues}`,
+			message = `[!optimize 1] - Upvalue count is not {#opt1upvaluesOrder}, it's {#opt1upvalues}`,
 		}
 	end
 

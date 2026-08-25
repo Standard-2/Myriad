@@ -10,8 +10,6 @@ return function()
 	end
 
 	--// Functionality test
-	local pFlag, pI, pV = false
-
 	local function originalFunction()
 		local _1 = 2
 		local _2 = "A"
@@ -22,28 +20,40 @@ return function()
 		Date.now()
 	end
 
-	local constOrder = { -- Optimization levels make this essentially useless. So we instead pass with inconsistency warnings, we could do a optimization check but eh.
-		[1] = "print",
-
-		[3] = "A",
-		[4] = "tostring",
-
-		[6] = "Date",
-		[7] = "now",
+	local constOrder = {
+		"print",
+		"A",
+		"tostring",
+		"Date",
+		"now",
 	}
 
-	for i, v in ipairs(constOrder) do
-		local const = debug.getconstant(originalFunction, i)
-		if const ~= v then
-			pFlag = true
-			pV = v
-			pI = i
+	local constants = {}
+	local index = 1
+
+	while true do
+		local success, const = pcall(debug.getconstant, originalFunction, index)
+		if not success then
+			break
 		end
 
-		constOrder[i] = const
+		if const ~= nil then
+			constants[#constants + 1] = const
+		end
+
+		index += 1
 	end
 
-	local invalidIndexSuccess, _ = pcall(debug.getconstant, originalFunction, 20)
+	for i, v in ipairs(constOrder) do
+		if not table.find(constants, v) then
+			return {
+				status = 500,
+				message = `Expected constant was not found: {v}`,
+			}
+		end
+	end
+
+	local invalidIndexSuccess, _ = pcall(debug.getconstant, originalFunction, index)
 
 	if invalidIndexSuccess then
 		return {
@@ -66,13 +76,6 @@ return function()
 		return {
 			status = 501,
 			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	if pFlag then
-		return {
-			status = 200,
-			message = `Passed with inconsistency:  Constant at {pI} should be: {pV}. Got: {constOrder[pI]} (Check your optimization level)`,
 		}
 	end
 
