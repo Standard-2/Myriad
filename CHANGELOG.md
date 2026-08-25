@@ -2,6 +2,15 @@
 
 # Changelog
 
+## [UNRELEASED] - `STABLE` `HOTFIX`
+
+> Target [1.7.1]
+
+## Fixed
+
+- [Standards test] Fixed issues and index hardcoding with `getupvalue` & `getupvalues` checks.
+- [Standards test] Fixed issues and index hardcoding with `getconstant` & `getconstants`. Additionally, the inconsistency check was removed, and missing aliases were added.
+
 ## [1.7.0] - `STABLE`
 
 ### Added
