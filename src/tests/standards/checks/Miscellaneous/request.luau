@@ -11,7 +11,7 @@ return function()
 
 	--// Functionality Test
 	local response = request({
-		Url = "https://httpbin.org/user-agent",
+		Url = "https://any.httpbun.com/",
 		Method = "GET",
 	})
 
@@ -23,7 +23,7 @@ return function()
 	elseif response.StatusCode ~= 200 then
 		return {
 			status = 500,
-			message = "Didn't give status 200 (is httpbin.org down?)"
+			message = "Didn't give status 200 (is any.httpbun.com down?)"
 		}
 	end
 
