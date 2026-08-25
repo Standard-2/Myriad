@@ -2,14 +2,15 @@
 
 # Changelog
 
-## [UNRELEASED] - `STABLE` `HOTFIX`
-
-> Target [1.7.1]
+## [1.7.1] - `STABLE` `HOTFIX`
 
 ## Fixed
 
-- [Standards test] Fixed issues and index hardcoding with `getupvalue` & `getupvalues` checks.
-- [Standards test] Fixed issues and index hardcoding with `getconstant` & `getconstants`. Additionally, the inconsistency check was removed, and missing aliases were added.
+- [Standards test] Several issues and index hardcoding with `getupvalue` & `getupvalues` checks. [#22]
+- [Standards test] Several issues and index hardcoding with `getconstant` & `getconstants`. Additionally, the inconsistency check was removed, and missing aliases were added. [#22]
+- [Standards test] Instance being destroyed too early in the `Drawing.new` check. [#23]
+- [Standards test] Updated the `200` response site from `httpbin.org` to `any.httpbun.com` in the `request` check. [#23]
+- [Standards test] Fourth case logic in the `gethiddenproperty` check.
 
 ## [1.7.0] - `STABLE`
 
@@ -431,6 +432,7 @@
 
 <!-- References -->
 
+[1.7.1]: https://github.com/Standard-2/Myriad/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/Standard-2/Myriad/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/Standard-2/Myriad/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/Standard-2/Myriad/compare/v1.6.1...v1.6.2
