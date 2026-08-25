@@ -15,12 +15,12 @@ return function()
 				return instance[property]
 			end)
 			if not success or value == nil then
+				instance:Destroy()
 				return {
 					status = 500,
 					message = `{objectName} is missing property: {property} (Did you give it a default value?)`,
 				}
 			end
-			instance:Destroy()
 		end
 	end
 
