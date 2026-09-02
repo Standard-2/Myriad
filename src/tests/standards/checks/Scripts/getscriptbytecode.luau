@@ -3,7 +3,7 @@
 
 return function()
 	local cryptReference = require("@dependencies/crypt/crypt.luau")
-	if not getrunningscripts then
+	if not getscriptbytecode then
 		return {
 			status = 400,
 			message = "Global not found",
