@@ -76,11 +76,11 @@ See the [**Building from Source**][build-docs] guide for complete setup and buil
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=standard2%2Fmyriad&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=standard2%2Fmyriad%2Cstandard-2%2Fmyriad&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=standard2/myriad&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=standard2/myriad&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=standard2/myriad&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=standard2/myriad%2Cstandard-2/myriad&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=standard2/myriad%2Cstandard-2/myriad&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=standard2/myriad%2Cstandard-2/myriad&type=date&legend=top-left" />
  </picture>
 </a>
 
