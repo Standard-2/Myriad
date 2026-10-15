@@ -3,9 +3,20 @@
   "description": "<!-- markdownlint-disable MD024 -->",
   "unreleased": {
     "notes": [
-      "Target: [1.7.2]"
+      "Target: [1.8.0]"
     ],
-    "changes": {}
+    "changes": {
+      "added": [
+        "[Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]",
+        "[Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]"
+      ],
+      "removed": [
+        "[Vulnerability test] Removed the identity escalation vulnerability check."
+      ],
+      "fixed": [
+        "[Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`."
+      ]
+    }
   },
   "releases": [
     {
@@ -15,7 +26,15 @@
         "HOTFIX"
       ],
       "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.0...v1.7.1",
-      "changes": {}
+      "changes": {
+        "fixed": [
+          "[Standards test] Several issues and index hardcoding with `getupvalue` & `getupvalues` checks. [#22]",
+          "[Standards test] Several issues and index hardcoding with `getconstant` & `getconstants`. Additionally, the inconsistency check was removed, and missing aliases were added. [#22]",
+          "[Standards test] Instance being destroyed too early in the `Drawing.new` check. [#23]",
+          "[Standards test] Updated the `200` response site from `httpbin.org` to `any.httpbun.com` in the `request` check. [#23]",
+          "[Standards test] Fourth case logic in the `gethiddenproperty` check."
+        ]
+      }
     },
     {
       "version": "1.7.0",

@@ -6,22 +6,22 @@
 
 > Target: [1.8.0]
 
-## Added
+### Added
 
 - [Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]
 - [Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]
 
-## Fixed
+### Fixed
 
 - [Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.
 
-## Removed
+### Removed
 
 - [Vulnerability test] Removed the identity escalation vulnerability check.
 
 ## [1.7.1] - `STABLE` `HOTFIX`
 
-## Fixed
+### Fixed
 
 - [Standards test] Several issues and index hardcoding with `getupvalue` & `getupvalues` checks. [#22]
 - [Standards test] Several issues and index hardcoding with `getconstant` & `getconstants`. Additionally, the inconsistency check was removed, and missing aliases were added. [#22]
