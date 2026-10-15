@@ -6,9 +6,18 @@
 
 > Target: [1.7.2]
 
+## Added
+
+- [Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]
+- [Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]
+
 ## Fixed
 
 - [Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.
+
+## Removed
+
+- [Vulnerability test] Removed the identity escalation vulnerability check.
 
 ## [1.7.1] - `STABLE` `HOTFIX`
 
