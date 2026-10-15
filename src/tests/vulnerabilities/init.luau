@@ -29,6 +29,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 		checkpointDelay = 0,
 		showSafe = true,
 		includeMetadata = false,
+		showTestTimes = true,
 		testTimeout = 5,
 		excludedTests = "",
 		includedTests = "",
@@ -47,6 +48,10 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 
 	local warnc = function(...)
 		output:AppendText(`<font color="#FFA500">{table.concat({ ... }, " ")}</font>`)
+	end
+
+	local function formatTestTime(elapsed: number)
+		return string.format("%.2fs", math.floor(elapsed * 100 + 0.5) / 100)
 	end
 
 	local function buildChecks()
@@ -313,7 +318,8 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 					end
 
 					local displayFunc = result.status == 200 and printc or warnc
-					displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}: {result.message}`)
+					local elapsedSuffix = testConfig.showTestTimes and ` ({formatTestTime(result.elapsedTestTime)})` or ""
+					displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}{elapsedSuffix}: {result.message}`)
 				end
 			end
 
