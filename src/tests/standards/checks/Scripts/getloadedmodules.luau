@@ -2,21 +2,30 @@
 --!nolint
 
 return function()
-	local indexedModule, module = pcall(function() return game:GetService("StarterPlayer").StarterPlayerScripts.PlayerModule end)
+	local network = game:GetService("ReplicatedStorage"):FindFirstChild("Network")
+	local module = network and network:FindFirstChild("emptyModule")
+
 	if not getloadedmodules then
 		return {
 			status = 400,
 			message = "Global not found",
 		}
-	elseif not indexedModule then
+	elseif not module then
 		return {
 			status = 401,
-			message = "Testing dependency 'PlayerModule' not found.",
+			message = "Testing dependency 'Network.emptyModule' not found.",
 		}
 	end
 
 	--// Functionality test
-	local loadedModule = require(module)
+	local requireOk, requireResult = pcall(require, module)
+	if not requireOk then
+		return {
+			status = 500,
+			message = `Failed to require 'Network.emptyModule': {requireResult}`,
+		}
+	end
+
 	local unloadedModule = Instance.new("ModuleScript")
 
 	local loadedModules = getloadedmodules()
