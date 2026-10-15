@@ -29,6 +29,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 		stripRichtext = false,
 		formatDiff = false,
 		includeMetadata = false,
+		showTestTimes = true,
 		excludedTests = "",
 		includedTests = "",
 		testTimeout = 8,
@@ -50,6 +51,10 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local warnc = function(...)
 		local message = table.concat({ ... }, " ")
 		output:AppendText(`<font color="#FFA500">{message}</font>`)
+	end
+
+	local function formatTestTime(elapsed: number)
+		return string.format("%.2fs", math.floor(elapsed * 100 + 0.5) / 100)
 	end
 
 	local function test()
@@ -299,7 +304,8 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 							groupProcessed = true
 						end
 						local displayFunc = (result.status == 200) and printc or warnc
-						displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}: {result.message}`)
+						local elapsedSuffix = testConfig.showTestTimes and ` ({formatTestTime(result.elapsedTestTime)})` or ""
+						displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}{elapsedSuffix}: {result.message}`)
 						includesFilter = true
 					end
 				end

@@ -119,6 +119,15 @@ return function(name, tab, titledRow, app, testConfig)
 				end,
 			})
 
+		titledRow(form, "Show Test Times", "Shows how long each test took in the output.")
+			:Right()
+			:Toggle({
+				Value = testConfig.showTestTimes,
+				ValueChanged = function(self, value)
+					testConfig.showTestTimes = value
+				end,
+			})
+
 		titledRow(form, "Include Metadata", "Shows executor metadata at the end."):Right():Toggle({
 			Value = false,
 			ValueChanged = function(self, value)
