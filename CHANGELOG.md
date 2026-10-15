@@ -14,6 +14,7 @@
 ### Fixed
 
 - [Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.
+- [Standards test] `getloadedmodules` no longer requires `StarterPlayerScripts.PlayerModule`, which was starting a second camera controller and could reset or lock the camera.
 
 ### Removed
 
