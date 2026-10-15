@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-> Target: [1.7.2]
+> Target: [1.8.0]
 
 ## Added
 
