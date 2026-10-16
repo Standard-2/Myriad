@@ -156,6 +156,7 @@ return function(self, properties: any)
 					showMessage = entry.status ~= 200 and message ~= "",
 					elapsedText = formatElapsed(entry.elapsed or entry.elapsedTestTime or 0),
 					showTimes = state.showTimes,
+					docsUrl = if type(entry.docsUrl) == "string" and entry.docsUrl ~= "" then entry.docsUrl else nil,
 				})
 			end
 
@@ -277,7 +278,7 @@ return function(self, properties: any)
 				end
 			end
 		end
-		if structures.setTimes then
+		if structures and structures.setTimes then
 			structures.setTimes(value)
 		end
 	end
@@ -292,7 +293,7 @@ return function(self, properties: any)
 				end
 			end
 		end
-		if structures.toggleGroup then
+		if structures and structures.toggleGroup then
 			structures.toggleGroup(name, open)
 		end
 	end
@@ -300,6 +301,12 @@ return function(self, properties: any)
 	function actions.onCopy()
 		if properties.Copied then
 			properties.Copied(buildText())
+		end
+	end
+
+	function actions.onDocs(url)
+		if properties.CopiedLink then
+			properties.CopiedLink(url)
 		end
 	end
 

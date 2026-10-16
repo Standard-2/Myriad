@@ -5,9 +5,8 @@ local cascade, _types = require("@packages/cascade"), require("@packages/cascade
 return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.App)
 	--// Imports
 	local checks = require("@checks/init")
+	local docsRefs = require("@checks/docsRefs")
 	local views = require("@self/views")
-	local gameRefs = require("@gameRefs")
-	local crypt = require("@dependencies/crypt/crypt")
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
 	local debugLogger = require("@modules/debugLogger")
@@ -222,11 +221,13 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					task.wait(testConfig.checkpointDelay)
 				end
 
+				local groupDocs = docsRefs[groupName]
 				table.insert(results[groupName], {
 					name = name,
 					status = status,
 					message = message,
 					elapsedTestTime = checkElapsed,
+					docsUrl = groupDocs and groupDocs[name] or nil,
 				})
 			end
 
@@ -420,6 +421,24 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 		testResults = tab:TestResults({
 			Kind = "standards",
 			Visible = false,
+			CopiedLink = function(url)
+				if setclipboard or toclipboard then
+					(setclipboard or toclipboard)(url)
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Copied link",
+						Subtitle = "Docs link copied to clipboard.",
+						Icon = cascade.Symbols.link,
+					})
+				else
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Failed to copy link",
+						Subtitle = url,
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+				end
+			end,
 			Copied = function(text)
 				if text == "" then
 					app:Notification({

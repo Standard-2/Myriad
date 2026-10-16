@@ -18,7 +18,7 @@ local TONE = {
 		end,
 	},
 	warn = {
-		icon = cascade.Symbols.questionmarkCircle,
+		icon = cascade.Symbols.questionmark,
 		color = function(theme)
 			return theme.Controls.Minimize
 		end,
@@ -454,7 +454,7 @@ return function(self, properties: any, actions)
 			Text = entry.name,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextTruncate = Enum.TextTruncate.AtEnd,
-			LayoutOrder = 2,
+			LayoutOrder = 3,
 			Parent = rowHost,
 			__dynamicKeys = {
 				TextColor3 = theme.Text.Primary[1],
@@ -466,12 +466,36 @@ return function(self, properties: any, actions)
 			Parent = host(name),
 		})
 
+		if entry.docsUrl then
+			local docsButton = create("ImageButton")({
+				Name = "Docs",
+				BackgroundTransparency = 1,
+				AutoButtonColor = false,
+				Size = UDim2.fromOffset(16, 16),
+				Image = cascade.Symbols.link,
+				ScaleType = Enum.ScaleType.Fit,
+				LayoutOrder = 2,
+				Parent = rowHost,
+				__dynamicKeys = {
+					ImageColor3 = theme.Text.Secondary[1],
+					ImageTransparency = theme.Text.Secondary[2],
+				},
+			})
+			create("UIFlexItem")({
+				FlexMode = Enum.UIFlexMode.None,
+				Parent = host(docsButton),
+			})
+			host(docsButton).MouseButton1Click:Connect(function()
+				actions.onDocs(entry.docsUrl)
+			end)
+		end
+
 		local trailing = create("Frame")({
 			Name = "Trailing",
 			BackgroundTransparency = 1,
 			AutomaticSize = Enum.AutomaticSize.X,
 			Size = UDim2.fromOffset(0, 22),
-			LayoutOrder = 3,
+			LayoutOrder = 4,
 			Parent = rowHost,
 
 			create("UIListLayout")({
