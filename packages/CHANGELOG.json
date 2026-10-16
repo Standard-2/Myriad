@@ -8,14 +8,21 @@
     "changes": {
       "added": [
         "[Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]",
-        "[Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]"
+        "[Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]",
+        "[Standards test] [Vulnerability test] Replaced the output console with a results list. Status, time, and problem filters live on the results view."
+      ],
+      "changed": [
+        "[Standards test] [Vulnerability test] Results groups use the form color, the summary line shows the pass rate in color, and group rows open and close smoothly.",
+        "[Standards test] Removed the console-only output settings (status filter, metadata, rich text, diff). Filter and copy are on the results view.",
+        "[Vulnerability test] Removed the console-only output settings (show safe, metadata, test times). Filter and copy are on the results view."
       ],
       "removed": [
         "[Vulnerability test] Removed the identity escalation vulnerability check."
       ],
       "fixed": [
         "[Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.",
-        "[Standards test] `getloadedmodules` no longer requires `StarterPlayerScripts.PlayerModule`, which was starting a second camera controller and could reset or lock the camera."
+        "[Standards test] `getloadedmodules` no longer requires `StarterPlayerScripts.PlayerModule`, which was starting a second camera controller and could reset or lock the camera.",
+        "[Standards test] [Vulnerability test] Opening a result group or toggling times no longer rebuilds the list. Failure messages use their full text, and the filter placeholder stays the tertiary color."
       ]
     }
   },

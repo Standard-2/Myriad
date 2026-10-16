@@ -7,6 +7,7 @@ local components = {
     ["KeybindLabel"]   = require("@self/Keybind Label"),
     ["KeystrokeField"] = require("@self/Keystroke Field"),
     ["ChangelogEntry"] = require("@self/Changelog Entry"),
+    ["TestResults"]    = require("@self/Test Results"),
 }
 
 --// Publish

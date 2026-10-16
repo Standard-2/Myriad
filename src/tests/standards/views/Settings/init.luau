@@ -11,32 +11,6 @@ return function(name, tab, titledRow, app, testConfig)
 	do
 		local form = pageSection:Form()
 
-		titledRow(form, "Status Filter", "Filter by status codes"):Right():PopUpButton({
-			Options = {
-				"All",
-				"✅ Pass",
-				"❓ Ambiguous",
-				"🔎 Missing",
-				"📦 Dependency",
-				"🛠️ Functionality",
-				"🏷️ Alias",
-			},
-			Value = 1,
-			ValueChanged = function(self, value: number)
-				local reference = {
-					[1] = false,
-					[2] = 200,
-					[3] = 0,
-					[4] = 400,
-					[5] = 401,
-					[6] = 500,
-					[7] = 501,
-				}
-
-				testConfig.statusFilter = reference[value]
-			end,
-		})
-
 		titledRow(form, "Included Tests", "Only run these libs or globals (comma-delimited). Leave blank to run all.")
 			:Right()
 			:TextField({
@@ -123,42 +97,6 @@ return function(name, tab, titledRow, app, testConfig)
 
 					config.logging.debugLogs.Value = value
 					testConfig.writeDebugLogs = value
-				end,
-			})
-
-		titledRow(form, "Include Metadata", "Includes metadata in the output. Useful for sharing formatted results.")
-			:Right()
-			:Toggle({
-				Value = false,
-				ValueChanged = function(self, value)
-					testConfig.includeMetadata = value
-				end,
-			})
-
-		titledRow(form, "Show Test Times", "Shows how long each test took in the output.")
-			:Right()
-			:Toggle({
-				Value = testConfig.showTestTimes,
-				ValueChanged = function(self, value)
-					testConfig.showTestTimes = value
-				end,
-			})
-
-		titledRow(form, "Strip Richtext", "Strips the richtext from output. Useful for sharing formatted results.")
-			:Right()
-			:Toggle({
-				Value = false,
-				ValueChanged = function(self, value)
-					testConfig.stripRichtext = value
-				end,
-			})
-
-		titledRow(form, "Diff Output", "Formats the output in diff. Useful for sharing formatted results.")
-			:Right()
-			:Toggle({
-				Value = false,
-				ValueChanged = function(self, value)
-					testConfig.formatDiff = value
 				end,
 			})
 	end

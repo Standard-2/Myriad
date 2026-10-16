@@ -2,7 +2,6 @@ local cascade, _types = require("@packages/cascade"), require("@packages/cascade
 
 return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _types.App)
 	--// Imports
-	local console = require("@dependencies/ui/console")
 	local views = require("@self/views")
 	local gameRefs = require("@gameRefs")
 	local crypt = require("@dependencies/crypt/crypt")
@@ -18,41 +17,19 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 	}
 
 	--// Variables
-	local copyButton = nil
-	local output = nil
 	local currentTask = nil
 	local currentLogger = nil
+	local testResults = nil
 	local testingState = nil
 	local builtViews = {}
 
 	local testConfig = {
 		checkpointDelay = 0,
-		showSafe = true,
-		includeMetadata = false,
-		showTestTimes = true,
 		testTimeout = 5,
 		excludedTests = "",
 		includedTests = "",
 		writeDebugLogs = config.logging.debugLogs.Value,
 	}
-
-	local uni = {
-		bullet = "•",
-	}
-	local statusCodes = require("@modules/statusCodes").Vulnerabilities
-
-	--// Private Methods
-	local printc = function(...)
-		output:AppendText(table.concat({ ... }, " "))
-	end
-
-	local warnc = function(...)
-		output:AppendText(`<font color="#FFA500">{table.concat({ ... }, " ")}</font>`)
-	end
-
-	local function formatTestTime(elapsed: number)
-		return string.format("%.2fs", math.floor(elapsed * 100 + 0.5) / 100)
-	end
 
 	local function buildChecks()
 		local checks = {}
@@ -162,10 +139,6 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 		return checkResult, os.clock() - startTime
 	end
 
-	local function shouldDisplay(result)
-		return testConfig.showSafe or result.status ~= 200
-	end
-
 	local function runTests()
 		if currentTask then
 			if currentLogger then
@@ -195,20 +168,16 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				testingState.CheckElapsed = 0
 			end
 
-			if output then
-				logger:write("Hiding previous output")
-				output.__instance.Visible = false
-				output:Clear()
-			end
-			if copyButton then
-				copyButton.__instance.Visible = false
+			if testResults then
+				logger:write("Hiding previous results")
+				testResults.Visible = false
 			end
 
 			local targetY = 0
 			if testingState and testingState.__container then
 				targetY = testingState.__container.AbsolutePosition.Y
-			elseif output and output.__instance then
-				targetY = output.__instance.AbsolutePosition.Y
+			elseif testResults and testResults.__container then
+				targetY = testResults.__container.AbsolutePosition.Y
 			end
 
 			game:GetService("TweenService")
@@ -282,63 +251,37 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				logger:write("Finished running vulnerability checks")
 				testingState.Visible = false
 			end
-			if output then
-				logger:write("Showing output console")
-				output.__instance.Visible = true
-			end
-			if copyButton then
-				copyButton.__instance.Visible = true
-			end
 
-			if output and output.__instance then
-				local consoleY = output.__instance.AbsolutePosition.Y
-				game:GetService("TweenService")
-					:Create(
-						tab.Structures.Page.__instance,
-						TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-						{
-							CanvasPosition = Vector2.new(
-								0,
-								consoleY
-									- tab.Structures.Page.__instance.AbsolutePosition.Y
-									+ tab.Structures.Page.__instance.CanvasPosition.Y
-							),
-						}
-					)
-					:Play()
-			end
-
-			local renderedCategories = {}
-			for _, result in ipairs(results) do
-				if shouldDisplay(result) then
-					if not renderedCategories[result.category] then
-						logger:write(`Rendering output category: {result.category}`)
-						printc(`\n{result.category}:`)
-						renderedCategories[result.category] = true
-					end
-
-					local displayFunc = result.status == 200 and printc or warnc
-					local elapsedSuffix = testConfig.showTestTimes and ` ({formatTestTime(result.elapsedTestTime)})` or ""
-					displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}{elapsedSuffix}: {result.message}`)
-				end
-			end
-
-			--// Summary
 			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
 			local rate = totals.checked > 0 and math.round((totals.secured / totals.checked) * 100) or 0
 			local executor, version = identifyexecutor()
 			logger:write(`Finished vulnerability test. Took: {endTime}s, executor: {executor or "Unknown"}, version: {version or "Unknown"}, checked: {totals.checked}, secured: {totals.secured}, vulnerable: {totals.vulnerable}, ambiguous: {totals.ambiguous}`)
 
-			printc(`\nSummary:`)
-			printc(`{uni.bullet} Took: {endTime}s`)
-			printc(`{uni.bullet} Executor: {executor or "Unknown"}`)
-			printc(`{uni.bullet} Checked: {totals.checked}`)
-			printc(`{uni.bullet} Secured: <font color="#55FF55">{totals.secured}</font>`)
-			printc(`{uni.bullet} Vulnerable: <font color="#FF5555">{totals.vulnerable}</font>`)
-			printc(`{uni.bullet} Ambiguous: {totals.ambiguous}`)
-			printc(`{uni.bullet} Security Rating: {rate}%`)
-			if excludedCount > 0 then
-				printc(`{uni.bullet} Excluded: {excludedCount} tests`)
+			local groups = {}
+			local groupIndex = {}
+			for _, result in ipairs(results) do
+				local group = groupIndex[result.category]
+				if not group then
+					logger:write(`Rendering result category: {result.category}`)
+					group = {
+						name = result.category,
+						entries = {},
+					}
+					groupIndex[result.category] = group
+					table.insert(groups, group)
+				end
+
+				local message = tostring(result.message or "")
+				if type(result.details) == "string" and result.details ~= "" then
+					message ..= ` ({result.details})`
+				end
+
+				table.insert(group.entries, {
+					name = result.name,
+					status = result.status,
+					message = message,
+					elapsed = result.elapsedTestTime,
+				})
 			end
 
 			local resultsData = {
@@ -350,19 +293,44 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				results = results,
 			}
 
-			if testConfig.includeMetadata then
-				logger:write("Adding metadata to output")
-				local input = output:GetValue()
+			if testResults then
+				logger:write("Showing test results")
+				testResults.Report = {
+					summary = {
+						took = endTime,
+						executor = executor or "Unknown",
+						version = version or "N/A",
+						tested = totals.checked,
+						passed = totals.secured,
+						failed = totals.vulnerable,
+						ambiguous = totals.ambiguous,
+						excluded = excludedCount,
+						rate = rate,
+						passedLabel = "secured",
+						failedLabel = "vulnerable",
+						ambiguousLabel = "ambiguous",
+					},
+					groups = groups,
+				}
+				testResults.Visible = true
 
-				local metaBlock = string.format(
-					'@metadata {\n  "generated": "%s",\n  "executor": "%s",\n  "version": "%s",\n  "rating": "%d%%"\n} \n\n',
-					DateTime.now():ToIsoDate(),
-					executor or "Unknown",
-					version or "N/A",
-					rate
-				)
-
-				output:SetValue(metaBlock .. input)
+				task.defer(function()
+					local resultsY = testResults.__container.AbsolutePosition.Y
+					game:GetService("TweenService")
+						:Create(
+							tab.Structures.Page.__instance,
+							TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+							{
+								CanvasPosition = Vector2.new(
+									0,
+									resultsY
+										- tab.Structures.Page.__instance.AbsolutePosition.Y
+										+ tab.Structures.Page.__instance.CanvasPosition.Y
+								),
+							}
+						)
+						:Play()
+				end)
 			end
 
 			local metadata = {
@@ -467,48 +435,6 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				end
 			end
 
-			-- Form 2
-			do
-				local form = section:Form()
-				copyButton = form
-
-				form:Row():Right():Button({
-					Label = "Copy results",
-					Pushed = function(self)
-						if output then
-							if setclipboard or toclipboard then
-								(setclipboard or toclipboard)(output:GetValue())
-								app:Notification({
-									App = "MYRIAD",
-									Title = "Copied output",
-									Subtitle = "Output copied to clipboard.",
-									Icon = cascade.Symbols.link,
-								})
-							else
-								app:Notification({
-									App = "MYRIAD",
-									Title = "Failed to copy Output",
-									Icon = cascade.Symbols.exclamationmarkTriangle,
-								})
-							end
-						elseif output:GetValue() == "" then
-							app:Notification({
-								App = "MYRIAD",
-								Title = "There is no output.",
-								Icon = cascade.Symbols.exclamationmarkTriangle,
-							})
-						else
-							app:Notification({
-								App = "MYRIAD",
-								Title = "Output dosen't exist. Was the UI initialized properly?",
-								Icon = cascade.Symbols.exclamationmarkTriangle,
-							})
-						end
-					end,
-				})
-
-				form.__instance.Visible = false
-			end
 		end
 
 		testingState = tab:TestingState({
@@ -519,17 +445,36 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 			NextTest = "None",
 		})
 
-		output = console.new(tab.__container, {
-			ReadOnly = true,
-			RichText = true,
-			LineHeight = 1.3,
-			Fill = true,
+		testResults = tab:TestResults({
+			Kind = "vulnerabilities",
+			Visible = false,
+			Copied = function(text)
+				if text == "" then
+					app:Notification({
+						App = "MYRIAD",
+						Title = "There is no output.",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+					return
+				end
+
+				if setclipboard or toclipboard then
+					(setclipboard or toclipboard)(text)
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Copied results",
+						Subtitle = "Results copied to clipboard.",
+						Icon = cascade.Symbols.link,
+					})
+				else
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Failed to copy results",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+				end
+			end,
 		})
-
-		output.__instance.Visible = false
-
-		output:Clear()
-		output:AppendText("")
 	end
 
 	do -- Subtabs

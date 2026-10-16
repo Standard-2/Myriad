@@ -6,7 +6,6 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	--// Imports
 	local checks = require("@checks/init")
 	local views = require("@self/views")
-	local console = require("@dependencies/ui/console")
 	local gameRefs = require("@gameRefs")
 	local crypt = require("@dependencies/crypt/crypt")
 	local config = require("@config")
@@ -14,10 +13,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local debugLogger = require("@modules/debugLogger")
 
 	--// Variables
-	local copyButton = nil
 	local currentTask = nil
 	local currentLogger = nil
-	local output = nil
+	local testResults = nil
 	local testingState = nil
 	local lastEntreePerGroup = {}
 	local results = {}
@@ -25,37 +23,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 	local testConfig = {
 		checkpointDelay = 0,
-		statusFilter = false,
-		stripRichtext = false,
-		formatDiff = false,
-		includeMetadata = false,
-		showTestTimes = true,
 		excludedTests = "",
 		includedTests = "",
 		testTimeout = 8,
 		writeDebugLogs = config.logging.debugLogs.Value,
 	}
-
-	local uni = {
-		bullet = "•",
-	}
-
-	local statusCodes = require("@modules/statusCodes").Standards
-
-	--// Functions
-	local printc = function(...)
-		local message = table.concat({ ... }, " ")
-		output:AppendText(message)
-	end
-
-	local warnc = function(...)
-		local message = table.concat({ ... }, " ")
-		output:AppendText(`<font color="#FFA500">{message}</font>`)
-	end
-
-	local function formatTestTime(elapsed: number)
-		return string.format("%.2fs", math.floor(elapsed * 100 + 0.5) / 100)
-	end
 
 	local function test()
 		if currentTask then
@@ -86,19 +58,16 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				testingState.CheckElapsed = 0
 			end
 
-			if output then
-				logger:write("Hiding previous output")
-				output.__instance.Visible = false
-			end
-			if copyButton then
-				copyButton.__instance.Visible = false
+			if testResults then
+				logger:write("Hiding previous results")
+				testResults.Visible = false
 			end
 
 			local targetY = 0
 			if testingState and testingState.__container then
 				targetY = testingState.__container.AbsolutePosition.Y
-			elseif output and output.__instance then
-				targetY = output.__instance.AbsolutePosition.Y
+			elseif testResults and testResults.__container then
+				targetY = testResults.__container.AbsolutePosition.Y
 			end
 
 			game:GetService("TweenService")
@@ -265,121 +234,61 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				logger:write("Finished running standards tests")
 				testingState.Visible = false
 			end
-			if output then
-				logger:write("Showing output console")
-				output.__instance.Visible = true
-				output:Clear()
-			end
-			if copyButton then
-				copyButton.__instance.Visible = true
-			end
-
-			if output and output.__instance then
-				local consoleY = output.__instance.AbsolutePosition.Y
-				game:GetService("TweenService")
-					:Create(
-						tab.Structures.Page.__instance,
-						TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-						{
-							CanvasPosition = Vector2.new(
-								0,
-								consoleY
-									- tab.Structures.Page.__instance.AbsolutePosition.Y
-									+ tab.Structures.Page.__instance.CanvasPosition.Y
-							),
-						}
-					)
-					:Play()
-			end
-
-			for groupName, groupResults in results do
-				logger:write(`Rendering output group: {groupName}`)
-				local includesFilter = false
-				local groupProcessed = false
-
-				for _, result in groupResults do
-					if not testConfig.statusFilter or statusCodes[result.status] == testConfig.statusFilter then
-						if not groupProcessed then
-							printc(groupName .. ":")
-							groupProcessed = true
-						end
-						local displayFunc = (result.status == 200) and printc or warnc
-						local elapsedSuffix = testConfig.showTestTimes and ` ({formatTestTime(result.elapsedTestTime)})` or ""
-						displayFunc(`{uni.bullet} {statusCodes[result.status]} {result.name}{elapsedSuffix}: {result.message}`)
-						includesFilter = true
-					end
-				end
-
-				if includesFilter then
-					printc("")
-				end
-			end
-
-			if testConfig.stripRichtext then
-				logger:write("Stripping richtext from output")
-				output:SetValue(output:GetValue():gsub("<br%s*/>", "\n"):gsub("<[^<>]->", ""))
-			end
-			if testConfig.formatDiff then -- Why is GPT so goated
-				logger:write("Formatting output as diff")
-				output:SetValue(output:GetValue():gsub("<br%s*/>", "\n"):gsub("<[^<>]->", ""))
-				local input = output:GetValue()
-				local lines = {}
-
-				for i, line in ipairs(string.split(input, "\n")) do
-					local cleaned = line:gsub("^•%s*", ""):gsub("^%s*(.-)%s*$", "%1")
-
-					if cleaned ~= "" then
-						if cleaned:find("✅") then
-							lines[i] = "+ " .. cleaned
-						elseif
-							cleaned:find("🔎")
-							or cleaned:find("❓")
-							or cleaned:find("🛠️")
-							or cleaned:find("📦")
-							or cleaned:find("🏷️")
-						then
-							lines[i] = "- " .. cleaned
-						else
-							lines[i] = cleaned
-						end
-					else
-						lines[i] = ""
-					end
-				end
-
-				output:SetValue(table.concat(lines, "\n"))
-			end
 
 			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
 			local executor, executorVers = identifyexecutor()
+			local tested = numStandards - excludedCount
+			local rate = tested > 0 and math.round(passed / tested * 100) or 0
 			logger:write(
-				`Finished standards test. Took: {endTime}s, executor: {executor or "Unknown"}, version: {executorVers or "Unknown"}, tested: {numStandards - excludedCount}, passed: {passed}, failed: {failed}`
+				`Finished standards test. Took: {endTime}s, executor: {executor or "Unknown"}, version: {executorVers or "Unknown"}, tested: {tested}, passed: {passed}, failed: {failed}`
 			)
 
-			printc(`Summary:`)
-			printc(`{uni.bullet} Took: {endTime}s`)
-			printc(`{uni.bullet} Executor: {executor or "Unknown"}`)
-			printc(`{uni.bullet} Tested: {numStandards - excludedCount}`)
-			printc(`{uni.bullet} Passed: {passed}`)
-			printc(`{uni.bullet} Failed: {failed}`)
-			printc(`{uni.bullet} Pass Rate: {math.round(passed / (numStandards - excludedCount) * 100)}%`)
-
-			if excludedCount > 0 then
-				printc(`{uni.bullet} Excluded: {excludedCount} tests`)
+			local groups = {}
+			for groupName, groupResults in results do
+				logger:write(`Rendering result group: {groupName}`)
+				table.insert(groups, {
+					name = groupName,
+					entries = groupResults,
+				})
 			end
 
-			if testConfig.includeMetadata then
-				logger:write("Adding metadata to output")
-				local input = output:GetValue()
+			if testResults then
+				logger:write("Showing test results")
+				testResults.Report = {
+					summary = {
+						took = endTime,
+						executor = executor or "Unknown",
+						version = executorVers or "Unknown",
+						tested = tested,
+						passed = passed,
+						failed = failed,
+						excluded = excludedCount,
+						rate = rate,
+						passedLabel = "passed",
+						failedLabel = "failed",
+						ambiguousLabel = "ambiguous",
+					},
+					groups = groups,
+				}
+				testResults.Visible = true
 
-				local metadata = string.format(
-					'@metadata {\n  "generated": "%s",\n  "executor": "%s",\n  "version": "%s",\n} \n\n',
-					DateTime.now():ToIsoDate(),
-					executor,
-					executorVers
-				)
-
-				output:SetValue(metadata .. input)
+				task.defer(function()
+					local resultsY = testResults.__container.AbsolutePosition.Y
+					game:GetService("TweenService")
+						:Create(
+							tab.Structures.Page.__instance,
+							TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+							{
+								CanvasPosition = Vector2.new(
+									0,
+									resultsY
+										- tab.Structures.Page.__instance.AbsolutePosition.Y
+										+ tab.Structures.Page.__instance.CanvasPosition.Y
+								),
+							}
+						)
+						:Play()
+				end)
 			end
 
 			--[[ local signatureId = ""
@@ -498,48 +407,6 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				end
 			end
 
-			-- Form 2
-			do
-				local form = section:Form()
-				copyButton = form
-
-				form:Row():Right():Button({
-					Label = "Copy output",
-					Pushed = function(self)
-						if output then
-							if setclipboard or toclipboard then
-								(setclipboard or toclipboard)(output:GetValue())
-								app:Notification({
-									App = "MYRIAD",
-									Title = "Copied output",
-									Subtitle = "Output copied to clipboard.",
-									Icon = cascade.Symbols.link,
-								})
-							else
-								app:Notification({
-									App = "MYRIAD",
-									Title = "Failed to copy output",
-									Icon = cascade.Symbols.exclamationmarkTriangle,
-								})
-							end
-						elseif output:GetValue() == "" then
-							app:Notification({
-								App = "MYRIAD",
-								Title = "There is no output.",
-								Icon = cascade.Symbols.exclamationmarkTriangle,
-							})
-						else
-							app:Notification({
-								App = "MYRIAD",
-								Title = "Output dosen't exist. Was the UI initialized properly?",
-								Icon = cascade.Symbols.exclamationmarkTriangle,
-							})
-						end
-					end,
-				})
-
-				form.__instance.Visible = false
-			end
 		end
 
 		testingState = tab:TestingState({
@@ -550,16 +417,36 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 			NextTest = "None",
 		})
 
-		output = console.new(tab.__container, {
-			ReadOnly = true,
-			RichText = true,
-			LineHeight = 1.3,
-			Fill = true,
+		testResults = tab:TestResults({
+			Kind = "standards",
+			Visible = false,
+			Copied = function(text)
+				if text == "" then
+					app:Notification({
+						App = "MYRIAD",
+						Title = "There is no output.",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+					return
+				end
+
+				if setclipboard or toclipboard then
+					(setclipboard or toclipboard)(text)
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Copied results",
+						Subtitle = "Results copied to clipboard.",
+						Icon = cascade.Symbols.link,
+					})
+				else
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Failed to copy results",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+				end
+			end,
 		})
-
-		output.__instance.Visible = false
-
-		output:Clear()
 	end
 
 	do

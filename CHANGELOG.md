@@ -10,6 +10,7 @@
 
 - [Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]
 - [Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]
+- [Standards test] [Vulnerability test] Replaced the output console with a results component. [#21]
 
 ### Fixed
 
