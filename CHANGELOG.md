@@ -2,7 +2,7 @@
 
 # Changelog
 
-## ## [1.8.0] - `STABLE`
+## [1.8.0] - `STABLE`
 
 ### Added
 
