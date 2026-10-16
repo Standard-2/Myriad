@@ -2,9 +2,7 @@
 
 # Changelog
 
-## [Unreleased]
-
-> Target: [1.8.0]
+## ## [1.8.0] - `STABLE`
 
 ### Added
 

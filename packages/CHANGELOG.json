@@ -1,27 +1,29 @@
 {
   "title": "Changelog",
   "description": "<!-- markdownlint-disable MD024 -->",
-  "unreleased": {
-    "notes": [
-      "Target: [1.8.0]"
-    ],
-    "changes": {
-      "added": [
-        "[Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]",
-        "[Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]",
-        "[Standards test] [Vulnerability test] Replaced the output console with a results component. [#21]",
-        "[Standards test] File dialog results include a docs link that copies the spec URL."
-      ],
-      "removed": [
-        "[Vulnerability test] Removed the identity escalation vulnerability check."
-      ],
-      "fixed": [
-        "[Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.",
-        "[Standards test] `getloadedmodules` no longer requires `StarterPlayerScripts.PlayerModule`, which was starting a second camera controller and could reset or lock the camera."
-      ]
-    }
-  },
   "releases": [
+    {
+      "version": "1.8.0",
+      "tags": [
+        "STABLE"
+      ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.1...v1.8.0",
+      "changes": {
+        "added": [
+          "[Standards test] Added per-test elapsed time output with a setting to toggle it. [#27]",
+          "[Vulnerability test] Added per-test elapsed time output with a setting to toggle it. [#27]",
+          "[Standards test] [Vulnerability test] Replaced the output console with a results component. [#21]",
+          "[Standards test] File dialog results include a docs link that copies the spec URL."
+        ],
+        "removed": [
+          "[Vulnerability test] Removed the identity escalation vulnerability check."
+        ],
+        "fixed": [
+          "[Standards test] Global existence check in `getscriptbytecode` used `getrunningscripts` instead of `getscriptbytecode`.",
+          "[Standards test] `getloadedmodules` no longer requires `StarterPlayerScripts.PlayerModule`, which was starting a second camera controller and could reset or lock the camera."
+        ]
+      }
+    },
     {
       "version": "1.7.1",
       "tags": [
