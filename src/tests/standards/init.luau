@@ -531,7 +531,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						else
 							app:Notification({
 								App = "MYRIAD",
-								Title = "Output dosen't exist. Was the UI initialized properly?",
+								Title = "Output doesn't exist. Was the UI initialized properly?",
 								Icon = cascade.Symbols.exclamationmarkTriangle,
 							})
 						end
