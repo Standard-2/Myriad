@@ -3,6 +3,19 @@
   "description": "<!-- markdownlint-disable MD024 -->",
   "releases": [
     {
+      "version": "1.8.1",
+      "tags": [
+        "STABLE"
+      ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.0...v1.8.1",
+      "changes": {
+        "added": [
+          "Re-added test uploading to the <https:\/\/myriad.tools> domain.",
+          "It is now handled on the client instead of through the server."
+        ]
+      }
+    },
+    {
       "version": "1.8.0",
       "tags": [
         "STABLE"
@@ -662,6 +675,7 @@
     "1.6.3": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.2...v1.6.3",
     "1.7.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.6.3...v1.7.0",
     "1.7.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.0...v1.7.1",
-    "1.8.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.1...v1.8.0"
+    "1.8.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.1...v1.8.0",
+    "1.8.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.0...v1.8.1"
   }
 }

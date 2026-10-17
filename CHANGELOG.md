@@ -2,6 +2,13 @@
 
 # Changelog
 
+## [1.8.1] - `STABLE`
+
+### Added
+
+- Re-added test uploading to the <https://myriad.tools> domain.
+  - It is now handled on the client instead of through the server.
+
 ## [1.8.0] - `STABLE`
 
 ### Added
@@ -450,6 +457,7 @@
 
 <!-- References -->
 
+[1.8.1]: https://github.com/Standard-2/Myriad/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/Standard-2/Myriad/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/Standard-2/Myriad/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/Standard-2/Myriad/compare/v1.6.3...v1.7.0
