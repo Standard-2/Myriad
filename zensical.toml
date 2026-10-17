@@ -28,6 +28,10 @@ nav = [
       "api/standards/checks.md",
     ] },
   ] },
+  { "WebAPI" = [
+    "web-api/index.md",
+    "web-api/results.md",
+  ] },
   { "Specification" = [
     "spec/index.md",
     { "File Dialog" = [
