@@ -10,12 +10,14 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
 	local debugLogger = require("@modules/debugLogger")
+	local uploadResult = require("@modules/uploadResult")
 
 	--// Variables
 	local currentTask = nil
 	local currentLogger = nil
 	local testResults = nil
 	local testingState = nil
+	local uploadPayload = nil
 	local lastEntreePerGroup = {}
 	local results = {}
 	local builtViews = {}
@@ -57,6 +59,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				testingState.CheckElapsed = 0
 			end
 
+			uploadPayload = nil
 			if testResults then
 				logger:write("Hiding previous results")
 				testResults.Visible = false
@@ -253,6 +256,28 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				})
 			end
 
+			uploadPayload = {
+				type = "s",
+				metadata = {
+					testBuildMetadata = if type(_P) == "table"
+						then {
+							genDate = _P.genDate,
+							cfg = _P.cfg,
+							vers = _P.vers,
+						}
+						else nil,
+					executor = executor or "Unknown",
+					executorVersion = tostring(executorVers or "Unknown"),
+					tested = tested,
+					passed = passed,
+					failed = failed,
+					testTime = endTime,
+					generated = DateTime.now():ToIsoDate(),
+					excludedCount = excludedCount,
+				},
+				results = results,
+			}
+
 			if testResults then
 				logger:write("Showing test results")
 				testResults.Report = {
@@ -291,46 +316,6 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						:Play()
 				end)
 			end
-
-			--[[ local signatureId = ""
-			local challenge = ""
-			local headers = ""
-			local resultHash = ""
-
-			pcall(function()
-				logger:write("Requesting result signature")
-				local ReqFunc = request or http_request or (http and http.request)
-				if ReqFunc then
-					local response = ReqFunc({
-						Url = "https://myriad.tools/api/gensignature",
-						Method = "GET",
-					})
-
-					if response and response.StatusCode == 200 then
-						local HttpService = game:GetService("HttpService")
-						local data = HttpService:JSONDecode(response.Body)
-						signatureId = data.signatureId
-						challenge = data.challenge
-						headers = data.obfuscatedHeaders
-
-						resultHash = crypt.hash(HttpService:JSONEncode(results) .. challenge)
-						logger:write(`Generated result signature: {signatureId}`)
-					end
-				end
-			end)
-
-			logger:write("Submitting standards results")
-			gameRefs.res:FireServer("s", results, {
-				["testBuildMetadata"] = _P,
-				["executor"] = executor,
-				["executorVersion"] = executorVers,
-				["tested"] = numStandards,
-				["passed"] = passed,
-				["failed"] = failed,
-				["testTime"] = endTime,
-				["generated"] = DateTime.now():ToIsoDate(),
-				["excludedCount"] = excludedCount,
-			}, signatureId, headers, resultHash) ]]
 
 			logger:finish("Standards test complete")
 			if logger.path and not logger.writeFailure then
@@ -435,6 +420,36 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						App = "MYRIAD",
 						Title = "Failed to copy link",
 						Subtitle = url,
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+				end
+			end,
+			Uploaded = function()
+				if not uploadPayload then
+					app:Notification({
+						App = "MYRIAD",
+						Title = "There is no output.",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+					return
+				end
+
+				local result = uploadResult(uploadPayload)
+				if result.ok then
+					if setclipboard or toclipboard then
+						(setclipboard or toclipboard)(result.url)
+					end
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Uploaded results",
+						Subtitle = result.url,
+						Icon = cascade.Symbols.link,
+					})
+				else
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Upload failed",
+						Subtitle = result.error,
 						Icon = cascade.Symbols.exclamationmarkTriangle,
 					})
 				end

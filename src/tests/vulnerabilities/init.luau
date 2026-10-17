@@ -3,11 +3,10 @@ local cascade, _types = require("@packages/cascade"), require("@packages/cascade
 return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _types.App)
 	--// Imports
 	local views = require("@self/views")
-	local gameRefs = require("@gameRefs")
-	local crypt = require("@dependencies/crypt/crypt")
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
 	local debugLogger = require("@modules/debugLogger")
+	local uploadResult = require("@modules/uploadResult")
 	local fallbackResult = require("@self/result")
 	local moduleFactories = {
 		Services = require("@self/services"),
@@ -19,6 +18,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 	--// Variables
 	local currentTask = nil
 	local currentLogger = nil
+	local uploadPayload = nil
 	local testResults = nil
 	local testingState = nil
 	local builtViews = {}
@@ -168,6 +168,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				testingState.CheckElapsed = 0
 			end
 
+			uploadPayload = nil
 			if testResults then
 				logger:write("Hiding previous results")
 				testResults.Visible = false
@@ -293,6 +294,28 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				results = results,
 			}
 
+			local metadata = {
+				executor = executor or "Unknown",
+				executorVersion = tostring(version or "Unknown"),
+				rating = rate,
+				testTime = endTime,
+				generated = DateTime.now():ToIsoDate(),
+				excludedCount = excludedCount,
+			}
+			if type(_P) == "table" then
+				metadata.testBuildMetadata = {
+					genDate = _P.genDate,
+					cfg = _P.cfg,
+					vers = _P.vers,
+				}
+			end
+
+			uploadPayload = {
+				type = "v",
+				metadata = metadata,
+				results = resultsData,
+			}
+
 			if testResults then
 				logger:write("Showing test results")
 				testResults.Report = {
@@ -333,41 +356,6 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				end)
 			end
 
-			local metadata = {
-				["executor"] = executor or "Unknown",
-				["executorVersion"] = version or "N/A",
-				["rating"] = rate,
-				["testTime"] = endTime,
-				["generated"] = DateTime.now():ToIsoDate(),
-			}
-
-			local signatureId = ""
-			local headers = ""
-			local resultHash = ""
-
-			pcall(function()
-				logger:write("Requesting result signature")
-				local ReqFunc = request or http_request or (http and http.request)
-				if ReqFunc then
-					local response = ReqFunc({
-						Url = "https://myriad.tools/api/gensignature",
-						Method = "GET",
-					})
-
-					if response and response.StatusCode == 200 then
-						local HttpService = game:GetService("HttpService")
-						local data = HttpService:JSONDecode(response.Body)
-						signatureId = data.signatureId
-						headers = data.obfuscatedHeaders
-
-						resultHash = crypt.hash(HttpService:JSONEncode(resultsData) .. data.challenge)
-						logger:write(`Generated result signature: {signatureId}`)
-					end
-				end
-			end)
-
-			logger:write("Submitting vulnerability results")
-			gameRefs.res:FireServer("v", resultsData, metadata, signatureId, headers, resultHash)
 			logger:finish("Vulnerability test complete")
 			if logger.path and not logger.writeFailure then
 				app:Notification({
@@ -448,6 +436,36 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 		testResults = tab:TestResults({
 			Kind = "vulnerabilities",
 			Visible = false,
+			Uploaded = function()
+				if not uploadPayload then
+					app:Notification({
+						App = "MYRIAD",
+						Title = "There is no output.",
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+					return
+				end
+
+				local result = uploadResult(uploadPayload)
+				if result.ok then
+					if setclipboard or toclipboard then
+						(setclipboard or toclipboard)(result.url)
+					end
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Uploaded results",
+						Subtitle = result.url,
+						Icon = cascade.Symbols.link,
+					})
+				else
+					app:Notification({
+						App = "MYRIAD",
+						Title = "Upload failed",
+						Subtitle = result.error,
+						Icon = cascade.Symbols.exclamationmarkTriangle,
+					})
+				end
+			end,
 			Copied = function(text)
 				if text == "" then
 					app:Notification({

@@ -304,6 +304,20 @@ return function(self, properties: any)
 		end
 	end
 
+	local uploading = false
+	function actions.onUpload()
+		if uploading or not properties.Uploaded then
+			return
+		end
+
+		uploading = true
+		local ok, err = pcall(properties.Uploaded)
+		uploading = false
+		if not ok then
+			warn(err)
+		end
+	end
+
 	function actions.onDocs(url)
 		if properties.CopiedLink then
 			properties.CopiedLink(url)

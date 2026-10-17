@@ -341,6 +341,17 @@ return function(self, properties: any, actions)
 		end,
 	})
 
+	if actions.onUpload then
+		controls:Button({
+			Label = "Upload",
+			State = "Secondary",
+			LayoutOrder = 7,
+			Pushed = function()
+				actions.onUpload()
+			end,
+		})
+	end
+
 	structures.SummaryLabel = create("TextLabel")({
 		Name = "Summary",
 		BackgroundTransparency = 1,
