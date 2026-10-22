@@ -130,7 +130,7 @@ if game.PlaceId == gameId then
 		end
 	end
 else
-	local gameLink = "https://www.roblox.com/games/80776325854596"
+	local gameLink = `https://www.roblox.com/games/{tostring(gameId)}`
 
 	warn(`Please join the testing game to use myriad: {gameLink}`)
 
