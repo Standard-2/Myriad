@@ -92,6 +92,16 @@ Unknown ids return `404` with `{ "error": "Result not found." }`.
 }
 ```
 
+## Latest
+
+`GET https://myriad.tools/api/latest/{type}/{executor}?version=1.2.3`
+
+`version` can be omitted. The response is one result, plus:
+
+```json
+"aggregate": { "executor": "Example", "version": "1.2.3", "samples": 4, "rate": 80, "fallback": false }
+```
+
 ## HTML
 
 `GET https://myriad.tools/view/{type}/{id}`
