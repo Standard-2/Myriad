@@ -38,6 +38,8 @@ Anything other than 200 is a failed standards check.
 
 `GET /api/latest/{type}/{executor}` returns the current result for that executor. Add `?version=1.2.3` to lock the version.
 
+`GET /api/executors` lists executors that have a counted run.
+
 `GET /view/{type}/{id}` is the HTML page.
 
 `GET /embed/{type}/{id}` is the iframe widget. Add `?theme=detailed` to list the checks.

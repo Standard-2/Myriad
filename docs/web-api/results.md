@@ -102,6 +102,18 @@ Unknown ids return `404` with `{ "error": "Result not found." }`.
 "aggregate": { "executor": "Example", "version": "1.2.3", "samples": 4, "rate": 80, "fallback": false }
 ```
 
+## Executors
+
+`GET https://myriad.tools/api/executors`
+
+```json
+{
+  "executors": [
+    { "executor": "Example", "standards": true, "vulnerability": false }
+  ]
+}
+```
+
 ## HTML
 
 `GET https://myriad.tools/view/{type}/{id}`
