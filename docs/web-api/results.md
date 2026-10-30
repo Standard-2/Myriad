@@ -99,8 +99,26 @@ Unknown ids return `404` with `{ "error": "Result not found." }`.
 `version` can be omitted. The response is one result, plus:
 
 ```json
-"aggregate": { "executor": "Example", "version": "1.2.3", "samples": 4, "rate": 80, "fallback": false }
+"aggregate": { "executor": "Example", "version": "1.2.3", "samples": 4, "rate": 80, "fallback": false, "platform": "windows", "platformFallback": false }
 ```
+
+`?platform=` separates builds that share one executor name by platform.
+
+However, platforms like `Delta iOS`, and `Delta Android` already have seperate names, so a platform lock isn't needed for these.
+
+| `platform` | Meaning |
+| ---------- | ------- |
+| `windows` | Windows |
+| `uwp` | UWP |
+| `android` | Android |
+| `ios` | iOS |
+| `macos` | macOS |
+| `console` | Xbox or PlayStation |
+| `unknown` | Missing or unrecognized |
+
+- Scores from different platforms are not averaged.
+- A requested platform with no counted runs uses the platform with the most counted runs, and `platformFallback` is true.
+- Older runs with no platform count as `unknown`.
 
 ## Executors
 
@@ -109,7 +127,7 @@ Unknown ids return `404` with `{ "error": "Result not found." }`.
 ```json
 {
   "executors": [
-    { "executor": "Example", "standards": true, "vulnerability": false }
+    { "executor": "Example", "standards": true, "vulnerability": false, "platforms": ["windows"] }
   ]
 }
 ```

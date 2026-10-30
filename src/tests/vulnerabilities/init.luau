@@ -7,6 +7,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 	local keybind = require("@modules/keybind")
 	local debugLogger = require("@modules/debugLogger")
 	local uploadResult = require("@modules/uploadResult")
+	local platform = require("@modules/platform")
 	local fallbackResult = require("@self/result")
 	local moduleFactories = {
 		Services = require("@self/services"),
@@ -297,6 +298,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 			local metadata = {
 				executor = executor or "Unknown",
 				executorVersion = tostring(version or "Unknown"),
+				platform = platform(),
 				rating = rate,
 				testTime = endTime,
 				generated = DateTime.now():ToIsoDate(),

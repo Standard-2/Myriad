@@ -36,7 +36,7 @@ Anything other than 200 is a failed standards check.
 
 `GET /api/results/{type}/{id}` returns JSON. Browsers on other sites can read it (`Access-Control-Allow-Origin: *`).
 
-`GET /api/latest/{type}/{executor}` returns the current result for that executor. Add `?version=1.2.3` to lock the version.
+`GET /api/latest/{type}/{executor}` returns the current result for that executor. Add `?version=1.2.3` to lock the version. Add `?platform=windows` to separate platforms that share one executor name.
 
 `GET /api/executors` lists executors that have a counted run.
 

@@ -11,6 +11,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local keybind = require("@modules/keybind")
 	local debugLogger = require("@modules/debugLogger")
 	local uploadResult = require("@modules/uploadResult")
+	local platform = require("@modules/platform")
 
 	--// Variables
 	local currentTask = nil
@@ -268,6 +269,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						else nil,
 					executor = executor or "Unknown",
 					executorVersion = tostring(executorVers or "Unknown"),
+					platform = platform(),
 					tested = tested,
 					passed = passed,
 					failed = failed,
