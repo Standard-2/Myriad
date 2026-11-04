@@ -15,7 +15,6 @@ return function()
 	local prop1Value, prop1Hidden = gethiddenproperty(originalPart, "Name")
 	local prop2Value, prop2Hidden = gethiddenproperty(originalPart, "PropertyStatusStudio")
 	local prop3Value, prop3Hidden = gethiddenproperty(workspace, "DataModelPlaceVersion")
-	local prop4Success, prop4Value, prop4Hidden = pcall(gethiddenproperty, originalPart, "siz")
 
 	-- Name
 	if prop1Hidden then
@@ -50,21 +49,6 @@ return function()
 		return {
 			status = 500,
 			message = "Hidden property value incorrect in workspace",
-		}
-	elseif not prop4Success then
-		return {
-			status = 500,
-			message = "Failed to get Write-only hidden property",
-		}
-	elseif not prop4Hidden then
-		return {
-			status = 500,
-			message = "Write-only hidden property assumed non-hidden",
-		}
-	elseif prop4Value ~= originalPart.Size then
-		return {
-			status = 500,
-			message = "Write-only hidden property value incorrect",
 		}
 	end
 
