@@ -2,6 +2,19 @@
 
 # Changelog
 
+## [UNRELEASED]
+
+> Target: 2.0.0
+
+### Added
+
+- [Standards] `hookfunction` check now has multiple new cases, including the entire x->y target matrix.
+- [Standards] `gethiddenproperty` and `sethiddenproperty` now have multiple new cases
+
+### Fixed
+
+- `gethiddenproperty` case updated to no longer use a removed roblox engine property.
+
 ## [1.8.2] - `STABLE`
 
 ### Added
