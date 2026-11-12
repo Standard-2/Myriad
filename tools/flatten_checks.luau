@@ -20,15 +20,20 @@ for name, path in string.gmatch(checks, '%["([^"]+)"%] = require%("@checks/([^"]
     
     if fs.isFile(file_path) then
         local content = fs.readFile(file_path)
-        local aliases_block = string.match(content, 'require%("@dependencies/aliasTest%.luau"%)%s*%(%s*{(.-)}%s*%)')
-        if aliases_block then
-            for alias in string.gmatch(aliases_block, '"([^"]+)"') do
+        local function collect(aliasesBlock)
+            if not aliasesBlock then
+                return
+            end
+            for alias in string.gmatch(aliasesBlock, '"([^"]+)"') do
                 flatten(alias)
             end
-            for alias in string.gmatch(aliases_block, "'([^']+)'") do
+            for alias in string.gmatch(aliasesBlock, "'([^']+)'") do
                 flatten(alias)
             end
         end
+
+        collect(string.match(content, 'require%("@standards/framework"%)%.aliases%s*%(%s*{(.-)}%s*%)'))
+        collect(string.match(content, 'aliases%s*=%s*{(.-)}'))
     end
 end
 

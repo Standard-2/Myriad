@@ -1,47 +1,57 @@
 --!nocheck
 --!nolint
 
-return function()
-	local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+return {
+	global = "crypt.hmac",
+	cases = {
+		{
+			id = "type",
+			run = function(self)
+				local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+				self._referenceCrypt = referenceCrypt
 
-	if not crypt or not crypt.hmac then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+				local plaintext = "MYRIAD"
+				local key = "secret_key"
+				local algorithm = "sha256"
+				local assumed = crypt.hmac(key, plaintext, algorithm)
+				if assumed then
+					self._assumed = assumed
+				end
 
-	local plaintext = "MYRIAD"
-	local key = "secret_key"
-	local algorithm = "sha256"
+				if not assumed then
+					return {
+						status = 500,
+						message = "Did not return the expected type",
+					}
+				end
 
-	local reference = "FaDPiTSLlbxRP5rKvomt0dzwl7zhszc46/QFPsZRGWY="
-	local assumed = crypt.hmac(key, plaintext, algorithm)
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "reference",
+			run = function(self)
+				if not self._assumed then
+					return { status = 200, message = "Passed" }
+				end
 
-	if not assumed then
-		return {
-			status = 500,
-			message = "Did not return the expected type",
-		}
-	elseif assumed ~= reference then
-		return {
-			status = 500,
-			message = "Data doesn't match reference data",
-		}
-	end
+				local reference = "FaDPiTSLlbxRP5rKvomt0dzwl7zhszc46/QFPsZRGWY="
+				local assumed = self._assumed
+				if assumed ~= reference then
+					return {
+						status = 500,
+						message = "Data doesn't match reference data",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}

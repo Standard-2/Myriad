@@ -1,51 +1,68 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not setscriptable then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "setscriptable",
+	cases = {
+		{
+			id = "initial",
+			run = function(self)
+				local originalPart = Instance.new("Part")
+				self._part = originalPart
 
-	local originalPart = Instance.new("Part")
+				if pcall(function()
+					local _ = originalPart.MaterialVariantSerialized
+				end) then
+					return {
+						status = 500,
+						message = "Unaccessible property accessible",
+					}
+				end
 
-	if pcall(function() local _ = originalPart.MaterialVariantSerialized end) then
-		return {
-			status = 500,
-			message = "Unaccessible property accessible",
-		}
-	end
+				return { status = 200, message = "Passed" }
+			end,
+		},
+		{
+			id = "scriptable",
+			run = function(self)
+				local originalPart = self._part
+				if originalPart == nil then
+					return { status = 200, message = "Passed" }
+				end
 
-	setscriptable(originalPart, "MaterialVariantSerialized", true)
-	if not pcall(function() local _ = originalPart.MaterialVariantSerialized end) then
-		return {
-			status = 500,
-			message = "MaterialVariantSerialized inaccessible after being set as scriptable",
-		}
-	end
+				setscriptable(originalPart, "MaterialVariantSerialized", true)
+				if not pcall(function()
+					local _ = originalPart.MaterialVariantSerialized
+				end) then
+					return {
+						status = 500,
+						message = "MaterialVariantSerialized inaccessible after being set as scriptable",
+					}
+				end
 
-	setscriptable(originalPart, "MaterialVariantSerialized", false)
-	if pcall(function() local _ = originalPart.MaterialVariantSerialized end) then
-		return {
-			status = 500,
-			message = "MaterialVariantSerialized accessible after being set as unscriptable",
-		}
-	end
+				return { status = 200, message = "Passed" }
+			end,
+		},
+		{
+			id = "unscriptable",
+			run = function(self)
+				local originalPart = self._part
+				if originalPart == nil then
+					return { status = 200, message = "Passed" }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				setscriptable(originalPart, "MaterialVariantSerialized", false)
+				if pcall(function()
+					local _ = originalPart.MaterialVariantSerialized
+				end) then
+					return {
+						status = 500,
+						message = "MaterialVariantSerialized accessible after being set as unscriptable",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return { status = 200, message = "Passed" }
+			end,
+		},
+	},
+}

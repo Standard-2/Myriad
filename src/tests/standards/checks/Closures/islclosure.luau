@@ -1,43 +1,51 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not islclosure then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "islclosure",
+	cases = {
+		{
+			id = "lua",
+			run = function(self)
+				local function luaClosure()
+					return 1
+				end
+				local cClosure = print
+				self._luaClosure = luaClosure
+				self._cClosure = cClosure
 
-	local function luaClosure()
-		return 1
-	end
-	local cClosure = print
+				if not islclosure(luaClosure) then
+					return {
+						status = 500,
+						message = "Failed to identify lua closure",
+					}
+				end
 
-	if not islclosure(luaClosure) then
-		return {
-			status = 500,
-			message = "Failed to identify lua closure",
-		}
-	elseif islclosure(cClosure) then
-		return {
-			status = 500,
-			message = "Identified C closure as lua closure",
-		}
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "c",
+			run = function(self)
+				if self._cClosure == nil then
+					return { status = 200, message = "Passed" }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if islclosure(self._cClosure) then
+					return {
+						status = 500,
+						message = "Identified C closure as lua closure",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

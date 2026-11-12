@@ -94,6 +94,7 @@ return function(self, properties: any)
 		statusIndex = 1,
 		showTimes = true,
 		expanded = {},
+		casesOpen = {},
 		view = nil,
 	}
 
@@ -125,26 +126,88 @@ return function(self, properties: any)
 		local query = string.lower(state.query)
 		local statusFilter = filters[state.statusIndex] or filters[1]
 		local groups = {}
+		local casePassed = 0
+		local caseTotal = 0
+
+		local function presentCase(caseResult)
+			local caseMessage = tostring(caseResult.message or "")
+			return {
+				name = tostring(caseResult.id or ""),
+				status = caseResult.status,
+				message = caseMessage,
+				tone = entryTone(caseResult.status),
+				icon = icons[caseResult.status] or "•",
+				showMessage = caseResult.status ~= 200 and caseMessage ~= "",
+				showStatus = true,
+				elapsedText = formatElapsed(caseResult.elapsed or 0),
+				showTimes = state.showTimes,
+				indent = 28,
+			}
+		end
 
 		for _, group in report.groups do
 			local entries = {}
 			local passed = 0
 
 			for _, entry in group.entries do
-				if not statusFilter.match(entry) then
+				local message = tostring(entry.message or "")
+				local sourceCases = if type(entry.cases) == "table" then entry.cases else nil
+				local caseCount = if sourceCases then #sourceCases else 0
+				local hasCases = caseCount >= 2
+
+				if caseCount > 0 then
+					for _, caseResult in sourceCases do
+						caseTotal += 1
+						if caseResult.status == 200 then
+							casePassed += 1
+						end
+					end
+				end
+
+				local parentStatusMatch = statusFilter.match(entry)
+				local anyCaseStatus = false
+				if hasCases then
+					for _, caseResult in sourceCases do
+						if statusFilter.match(caseResult) then
+							anyCaseStatus = true
+							break
+						end
+					end
+				end
+				if not parentStatusMatch and not anyCaseStatus then
 					continue
 				end
 
-				local message = tostring(entry.message or "")
-				if query ~= "" then
-					local haystack = string.lower(`{group.name} {entry.name} {message} {entry.status}`)
-					if not string.find(haystack, query, 1, true) then
-						continue
+				local parentHay = if hasCases
+					then string.lower(`{group.name} {entry.name}`)
+					else string.lower(`{group.name} {entry.name} {message} {entry.status}`)
+				local parentQuery = query == "" or string.find(parentHay, query, 1, true) ~= nil
+				local anyCaseQuery = false
+				local visibleCases = {}
+				if hasCases then
+					for _, caseResult in sourceCases do
+						local caseHay = string.lower(`{caseResult.id or ""} {caseResult.message or ""} {caseResult.status}`)
+						local caseQuery = query ~= "" and string.find(caseHay, query, 1, true) ~= nil
+						if caseQuery then
+							anyCaseQuery = true
+						end
+						local statusOk = statusFilter.label == "All" or statusFilter.match(caseResult)
+						if statusOk and (query == "" or parentQuery or caseQuery) then
+							table.insert(visibleCases, presentCase(caseResult))
+						end
 					end
+				end
+				if query ~= "" and not parentQuery and not anyCaseQuery then
+					continue
 				end
 
 				if entry.status == 200 then
 					passed += 1
+				end
+
+				local key = `{group.name}\0{entry.name}`
+				if hasCases and state.casesOpen[key] == nil then
+					state.casesOpen[key] = entry.status ~= 200
 				end
 
 				table.insert(entries, {
@@ -153,10 +216,15 @@ return function(self, properties: any)
 					message = message,
 					tone = entryTone(entry.status),
 					icon = icons[entry.status] or "•",
-					showMessage = entry.status ~= 200 and message ~= "",
+					showMessage = not hasCases and entry.status ~= 200 and message ~= "",
+					showStatus = not hasCases,
 					elapsedText = formatElapsed(entry.elapsed or entry.elapsedTestTime or 0),
 					showTimes = state.showTimes,
 					docsUrl = if type(entry.docsUrl) == "string" and entry.docsUrl ~= "" then entry.docsUrl else nil,
+					hasCases = hasCases,
+					casesOpen = hasCases and state.casesOpen[key] == true,
+					caseEntries = visibleCases,
+					key = key,
 				})
 			end
 
@@ -202,6 +270,7 @@ return function(self, properties: any)
 			rate = summary.rate or 0,
 			timeText = formatElapsed(summary.took or 0),
 			extra = table.concat(extras, " • "),
+			caseText = if caseTotal > 0 then `{casePassed}/{caseTotal} cases` else nil,
 			groups = groups,
 			empty = #groups == 0,
 		}
@@ -252,6 +321,12 @@ return function(self, properties: any)
 			for _, entry in group.entries do
 				local elapsedSuffix = if state.showTimes and entry.elapsedText then ` ({entry.elapsedText})` else ""
 				table.insert(lines, `  {entry.icon} {entry.name}{elapsedSuffix}: {entry.message}`)
+				if entry.caseEntries then
+					for _, caseEntry in entry.caseEntries do
+						local caseElapsed = if state.showTimes and caseEntry.elapsedText then ` ({caseEntry.elapsedText})` else ""
+						table.insert(lines, `    {caseEntry.icon} {caseEntry.name}{caseElapsed}: {caseEntry.message}`)
+					end
+				end
 			end
 			table.insert(lines, "")
 		end
@@ -280,6 +355,23 @@ return function(self, properties: any)
 		end
 		if structures and structures.setTimes then
 			structures.setTimes(value)
+		end
+	end
+
+	function actions.onToggleCase(key)
+		local open = state.casesOpen[key] ~= true
+		state.casesOpen[key] = open
+		if state.view then
+			for _, group in state.view.groups do
+				for _, entry in group.entries do
+					if entry.key == key then
+						entry.casesOpen = open
+					end
+				end
+			end
+		end
+		if structures and structures.toggleCases then
+			structures.toggleCases(key, open)
 		end
 	end
 
@@ -344,6 +436,7 @@ return function(self, properties: any)
 		Report = function(report)
 			state.report = report
 			state.expanded = {}
+			state.casesOpen = {}
 			if report then
 				for _, group in report.groups do
 					state.expanded[group.name] = true

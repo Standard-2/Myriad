@@ -1,48 +1,75 @@
 --!nocheck
 --!nolint
 
-return function()
-	local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+return {
+	global = "crypt.generatekey",
+	cases = {
+		{
+			id = "type",
+			run = function(self)
+				local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+				local key1 = referenceCrypt.base64decode(crypt.generatekey())
+				local key2 = referenceCrypt.base64decode(crypt.generatekey())
+				self._key2 = key2
+				if type(key1) == "string" then
+					self._key1 = key1
+				end
 
-	if not crypt or not crypt.generatekey then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+				if type(key1) ~= "string" then
+					return {
+						status = 500,
+						message = "Generated key doesn't form a string",
+					}
+				end
 
-	local key1 = referenceCrypt.base64decode(crypt.generatekey())
-	local key2 = referenceCrypt.base64decode(crypt.generatekey())
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "length",
+			run = function(self)
+				if type(self._key1) ~= "string" then
+					return { status = 200, message = "Passed" }
+				end
 
-	if type(key1) ~= "string" then
-		return {
-			status = 500,
-			message = "Generated key doesn't form a string",
-		}
-	elseif #key1 ~= 32 then
-		return {
-			status = 500,
-			message = "Key dosen't match the expected length",
-		}
-	elseif key1 == key2 then
-		return {
-			status = 500,
-			message = "Keys aren't unique",
-		}
-	end
+				local key1 = self._key1
+				if #key1 ~= 32 then
+					return {
+						status = 500,
+						message = "Key dosen't match the expected length",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "unique",
+			run = function(self)
+				if type(self._key1) ~= "string" then
+					return { status = 200, message = "Passed" }
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				local key1 = self._key1
+				local key2 = self._key2
+				if key1 == key2 then
+					return {
+						status = 500,
+						message = "Keys aren't unique",
+					}
+				end
 
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}

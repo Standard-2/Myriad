@@ -1,50 +1,69 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not isexecutorclosure then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
-
-	local function luaClosure()
-		return 1
-	end
-
-	if not isexecutorclosure(isexecutorclosure)	then
-		return {
-			status = 500,
-			message = "Failed to identify an executor closure",
-		}
-	elseif not isexecutorclosure(luaClosure) then
-		return {
-			status = 500,
-			message = "Did not identify an lua closure as an executor closure",
-		}
-	elseif isexecutorclosure(print) then
-		return {
-			status = 500,
-			message = "Identified a lua standard closure as an executor closure",
-		}
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+return {
+	global = "isexecutorclosure",
+	aliases = {
 		"checkclosure",
-		"isourclosure"
-	})
+		"isourclosure",
+	},
+	cases = {
+		{
+			id = "executor",
+			run = function(self)
+				local function luaClosure()
+					return 1
+				end
+				self._luaClosure = luaClosure
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				if not isexecutorclosure(isexecutorclosure) then
+					return {
+						status = 500,
+						message = "Failed to identify an executor closure",
+					}
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "lua",
+			run = function(self)
+				if self._luaClosure == nil then
+					return { status = 200, message = "Passed" }
+				end
+
+				if not isexecutorclosure(self._luaClosure) then
+					return {
+						status = 500,
+						message = "Did not identify an lua closure as an executor closure",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "standard",
+			run = function(self)
+				if isexecutorclosure(print) then
+					return {
+						status = 500,
+						message = "Identified a lua standard closure as an executor closure",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

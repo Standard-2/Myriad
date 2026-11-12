@@ -1,37 +1,52 @@
 --!nocheck
 --!nolint
 
-return function()
-	if type(replicatesignal) ~= "function" then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	cases = {
+		{
+			id = "global",
+			run = function(self)
+				if type(replicatesignal) ~= "function" then
+					return {
+						status = 400,
+						message = "Global not found",
+					}
+				end
 
-	local s, err = pcall(function()
-		replicatesignal(Instance.new("ProximityPrompt").Triggered, game:GetService("Players").LocalPlayer)
-	end)
+				self._fn = true
 
-	if not s and not string.find(string.lower(tostring(err)), "replicate") then
-		return {
-			status = 0,
-			message = `Ambiguous error: {err}`,
-		}
-	end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "replicate",
+			run = function(self)
+				if not self._fn then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
-	
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				local s, err = pcall(function()
+					replicatesignal(Instance.new("ProximityPrompt").Triggered, game:GetService("Players").LocalPlayer)
+				end)
 
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				if not s and not string.find(string.lower(tostring(err)), "replicate") then
+					return {
+						status = 0,
+						message = `Ambiguous error: {err}`,
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}

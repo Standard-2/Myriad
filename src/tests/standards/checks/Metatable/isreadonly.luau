@@ -1,45 +1,45 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not isreadonly then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "isreadonly",
+	cases = {
+		{
+			id = "writable",
+			run = function(self)
+				--// Functionality test
+				local originalTable = {}
 
-	--// Functionality test
-	local originalTable = {}
+				if isreadonly(originalTable) then
+					return {
+						status = 500,
+						message = "Writable table is assumed read-only",
+					}
+				end
 
-	if isreadonly(originalTable) then
-		return {
-			status = 500,
-			message = "Writable table is assumed read-only"
-		}
-	end
+				self._table = originalTable
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "frozen",
+			run = function(self)
+				local originalTable = self._table
+				if not originalTable then
+					return { status = 200, message = `Passed` }
+				end
 
-	table.freeze(originalTable)
+				table.freeze(originalTable)
 
-	if not isreadonly(originalTable) then
-		return {
-			status = 500,
-			message = "Table assumed writable after being set as read-only"
-		}
-	end
+				if not isreadonly(originalTable) then
+					return {
+						status = 500,
+						message = "Table assumed writable after being set as read-only",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return { status = 200, message = `Passed` }
+			end,
+		},
+	},
+}

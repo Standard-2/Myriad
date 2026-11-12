@@ -6,6 +6,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	--// Imports
 	local checks = require("@checks/init")
 	local docsRefs = require("@checks/docsRefs")
+	local framework = require("@standards/framework")
 	local views = require("@self/views")
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
@@ -124,6 +125,8 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				end
 			end
 
+			framework.begin(checks)
+
 			local flattened = {}
 			for groupName, group in checks do
 				for name, test in group do
@@ -167,33 +170,55 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 
 				local startTestTime = os.clock()
 				local success, result
+				local cached = framework.peek(testId)
 
-				do
-					local done = false
-					local thread = task.spawn(function()
-						success, result = pcall(test)
-						done = true
-					end)
+				if cached then
+					success = true
+					result = cached
+				else
+					do
+						local done = false
+						local thread = task.spawn(function()
+							success, result = pcall(framework.run, test, testId)
+							done = true
+						end)
 
-					local elapsed = 0
-					while not done and elapsed < testConfig.testTimeout do
-						task.wait(0.061)
-						elapsed = os.clock() - startTestTime
-						if testingState then
-							testingState.TotalElapsed = time() - startTime
-							testingState.CheckElapsed = elapsed
+						local elapsed = 0
+						while not done and elapsed < testConfig.testTimeout do
+							task.wait(0.061)
+							elapsed = os.clock() - startTestTime
+							if testingState then
+								testingState.TotalElapsed = time() - startTime
+								testingState.CheckElapsed = elapsed
+							end
 						end
-					end
 
-					if not done then
-						task.cancel(thread)
-						success = false
-						result = `Timed out after {testConfig.testTimeout}s`
-						logger:write(`Test timed out: {testId}, timeout: {testConfig.testTimeout}s`)
+						if not done then
+							task.cancel(thread)
+							success = false
+							result = `Timed out after {testConfig.testTimeout}s`
+							framework.store(testId, {
+								status = 0,
+								message = result,
+								elapsed = testConfig.testTimeout,
+							})
+							logger:write(`Test timed out: {testId}, timeout: {testConfig.testTimeout}s`)
+						end
 					end
 				end
 
-				local checkElapsed = os.clock() - startTestTime
+				local checkElapsed = if cached then (cached.elapsed or 0) else os.clock() - startTestTime
+				if not cached and success and type(result) == "table" then
+					result.elapsed = checkElapsed
+					framework.store(testId, result)
+				elseif not cached and not success then
+					framework.store(testId, {
+						status = 0,
+						message = tostring(result),
+						elapsed = checkElapsed,
+					})
+				end
+
 				local status, message
 
 				if not success then
@@ -213,6 +238,20 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					`Ran test: {testId}, result: {status}, message: {message}, elapsed: {checkElapsed}s, next test: {nextTestId}`
 				)
 
+				local cases = if success and type(result) == "table" and type(result.cases) == "table" then result.cases else nil
+				if cases then
+					local casePassed = 0
+					for _, caseResult in cases do
+						if caseResult.status == 200 then
+							casePassed += 1
+						end
+						logger:write(
+							`Case {testId} {caseResult.id}: {caseResult.status}, {caseResult.message}, elapsed: {caseResult.elapsed}s`
+						)
+					end
+					logger:write(`Cases {testId}: {casePassed}/{#cases}`)
+				end
+
 				if testingState then
 					testingState.Passed = passed
 					testingState.Failed = failed
@@ -226,13 +265,17 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				end
 
 				local groupDocs = docsRefs[groupName]
-				table.insert(results[groupName], {
+				local row = {
 					name = name,
 					status = status,
 					message = message,
 					elapsedTestTime = checkElapsed,
 					docsUrl = groupDocs and groupDocs[name] or nil,
-				})
+				}
+				if cases and #cases > 0 then
+					row.cases = cases
+				end
+				table.insert(results[groupName], row)
 			end
 
 			if testingState then
@@ -257,6 +300,21 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				})
 			end
 
+			local uploadResults = {}
+			for groupName, groupResults in results do
+				local copied = {}
+				uploadResults[groupName] = copied
+				for _, entry in groupResults do
+					table.insert(copied, {
+						name = entry.name,
+						status = entry.status,
+						message = entry.message,
+						elapsedTestTime = entry.elapsedTestTime,
+						docsUrl = entry.docsUrl,
+					})
+				end
+			end
+
 			uploadPayload = {
 				type = "s",
 				metadata = {
@@ -277,7 +335,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					generated = DateTime.now():ToIsoDate(),
 					excludedCount = excludedCount,
 				},
-				results = results,
+				results = uploadResults,
 			}
 
 			if testResults then

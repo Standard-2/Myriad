@@ -1,59 +1,71 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not isfile then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	elseif not writefile then
-		return {
-			status = 401,
-			message = "Dependency 'writefile' not found",
-		}
-	elseif not delfile then
-		return {
-			status = 401,
-			message = "Dependency 'delfile' not found",
-		}
-	end
-
-	--// Functionality test
-	local guid = game:GetService("HttpService"):GenerateGUID(false):gsub("-", "")
-
-	if isfile(guid) then
-		return {
-			status = 500,
-			message = `Nonexistent file returned true`,
-		}
-	end
-	
-	writefile(guid, "")
-
-	task.wait(0.2)
-
-	if not isfile(guid) then
-		return {
-			status = 500,
-			message = `Existing file returned false`,
-		}
-	end
-
-	delfile(guid)
-	
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+return {
+	global = "isfile",
+	dependencies = {
+		globals = {
+			{ name = "writefile", message = "Dependency 'writefile' not found" },
+			{ name = "delfile", message = "Dependency 'delfile' not found" },
+		},
+	},
+	cases = {
+		{
+			id = "missing file",
+			run = function(self)
+				self._guid = game:GetService("HttpService"):GenerateGUID(false):gsub("-", "")
+				if isfile(self._guid) then
+					return {
+						status = 500,
+						message = `Nonexistent file returned true`,
+					}
+				end
+				self._clear = true
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "existing file",
+			run = function(self)
+				if not self._clear then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
+				self._wrote = true
+				writefile(self._guid, "")
+				task.wait(0.2)
+				if not isfile(self._guid) then
+					return {
+						status = 500,
+						message = `Existing file returned false`,
+					}
+				end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "delete",
+			run = function(self)
+				if not self._wrote then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
+				delfile(self._guid)
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

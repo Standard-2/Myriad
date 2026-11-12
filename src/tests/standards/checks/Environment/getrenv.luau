@@ -1,56 +1,99 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not getrenv then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "getrenv",
+	cases = {
+		{
+			id = "myrird1",
+			run = function(self)
+				getrenv().MYRIR1 = "Hello, World!"
+				getrenv().MYRIR2 = 123456789
+				self._ready = true
 
-    getrenv().MYRIR1 = "Hello, World!"
-    getrenv().MYRIR2 = 123456789
+				if getrenv().MYRIR1 ~= "Hello, World!" then
+					return {
+						status = 500,
+						message = "MYRIR1 not found or unexpected value",
+					}
+				end
 
-    if getrenv().MYRIR1 ~= "Hello, World!" then
-        return {
-            status = 500,
-            message = "MYRIR1 not found or unexpected value",
-        }
-    elseif getrenv().MYRIR2 ~= 123456789 then
-        return {
-            status = 500,
-            message = "MYRIR2 not found or unexpected value",
-        }
-    elseif getrenv().game ~= game then
-        return {
-            status = 500,
-            message = "game not found or unexpected value",
-        }
-    elseif getrenv().print ~= print then
-        return {
-            status = 500,
-            message = "print not found or unexpected value",
-        }
-    elseif getrenv()._G == _G then
-        return {
-            status = 500,
-            message = "_G in roblox environment shouldn't match the executor's",
-        }
-    end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "myrird2",
+			run = function(self)
+				if not self._ready then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
 
-    --// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if getrenv().MYRIR2 ~= 123456789 then
+					return {
+						status = 500,
+						message = "MYRIR2 not found or unexpected value",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "game",
+			run = function(self)
+				if getrenv().game ~= game then
+					return {
+						status = 500,
+						message = "game not found or unexpected value",
+					}
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "print",
+			run = function(self)
+				if getrenv().print ~= print then
+					return {
+						status = 500,
+						message = "print not found or unexpected value",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "g",
+			run = function(self)
+				if getrenv()._G == _G then
+					return {
+						status = 500,
+						message = "_G in roblox environment shouldn't match the executor's",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

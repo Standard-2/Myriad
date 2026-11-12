@@ -1,47 +1,55 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not debug or not debug.getprotos then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
-
-	--// Functionality test
-	local function originalFunction()
-		return function()
-			return "MYRI1"
-		end, function()
-			return "MYRI2"
-		end
-	end
-
-	local protos = debug.getprotos(originalFunction)
-
-	if #protos ~= 2 then
-		return { status = 500, message = "Incorrect proto count" }
-	end
-
-	if protos[1] == protos[2] then
-		return { status = 500, message = "Protos aren't unique." }
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+return {
+	global = "debug.getprotos",
+	aliases = {
 		"getprotos",
-	})
+	},
+	cases = {
+		{
+			id = "count",
+			run = function(self)
+				--// Functionality test
+				local function originalFunction()
+					return function()
+						return "MYRI1"
+					end, function()
+						return "MYRI2"
+					end
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				self._fn = originalFunction
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				local protos = debug.getprotos(originalFunction)
+				self._protos = protos
+				if #protos ~= 2 then
+					return { status = 500, message = "Incorrect proto count" }
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "unique",
+			run = function(self)
+				if type(self._protos) ~= "table" then
+					return { status = 200, message = "Passed" }
+				end
+
+				local protos = self._protos
+				if protos[1] == protos[2] then
+					return { status = 500, message = "Protos aren't unique." }
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

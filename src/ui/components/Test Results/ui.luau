@@ -416,16 +416,20 @@ return function(self, properties: any, actions)
 	local function buildRow(entry, order, parentInstance, elapsedOut)
 		local tone = TONE[entry.tone]
 		local color = toneColor(entry.tone)
+		local rowClass = if entry.hasCases then "TextButton" else "Frame"
 
-		local row = create("Frame")({
-			Name = `Row_{entry.name}`,
+		local row = create(rowClass)({
+			Name = `Row_{order}`,
 			Size = UDim2.new(1, 0, 0, 34),
 			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Text = if entry.hasCases then "" else nil,
+			AutoButtonColor = if entry.hasCases then false else nil,
 			LayoutOrder = order,
 			Parent = parentInstance,
 
 			create("UIPadding")({
-				PaddingLeft = UDim.new(0, 12),
+				PaddingLeft = UDim.new(0, entry.indent or 12),
 				PaddingRight = UDim.new(0, 12),
 			}),
 			create("UIListLayout")({
@@ -437,6 +441,11 @@ return function(self, properties: any, actions)
 			}),
 		})
 		local rowHost = host(row)
+		if entry.hasCases then
+			rowHost.MouseButton1Click:Connect(function()
+				actions.onToggleCase(entry.key)
+			end)
+		end
 
 		local icon = create("ImageLabel")({
 			Name = "Icon",
@@ -584,21 +593,44 @@ return function(self, properties: any, actions)
 			folder = host(elapsedFolder),
 		})
 
-		create("TextLabel")({
-			Name = "Status",
-			BackgroundTransparency = 1,
-			AutomaticSize = Enum.AutomaticSize.X,
-			Size = UDim2.fromOffset(0, 18),
-			FontFace = FONT_MEDIUM,
-			TextSize = 12,
-			Text = tostring(entry.status),
-			LayoutOrder = 3,
-			Parent = trailingHost,
-			__dynamicKeys = {
-				TextColor3 = color[1],
-				TextTransparency = color[2],
-			},
-		})
+		if entry.showStatus ~= false then
+			create("TextLabel")({
+				Name = "Status",
+				BackgroundTransparency = 1,
+				AutomaticSize = Enum.AutomaticSize.X,
+				Size = UDim2.fromOffset(0, 18),
+				FontFace = FONT_MEDIUM,
+				TextSize = 12,
+				Text = tostring(entry.status),
+				LayoutOrder = 3,
+				Parent = trailingHost,
+				__dynamicKeys = {
+					TextColor3 = color[1],
+					TextTransparency = color[2],
+				},
+			})
+		end
+
+		local chevronHost = nil
+		if entry.hasCases then
+			local chevron = create("ImageLabel")({
+				Name = "Chevron",
+				BackgroundTransparency = 1,
+				Size = UDim2.fromOffset(14, 14),
+				Image = cascade.Symbols.chevronDown,
+				Rotation = if entry.casesOpen then 180 else 0,
+				ScaleType = Enum.ScaleType.Fit,
+				LayoutOrder = 4,
+				Parent = trailingHost,
+				__dynamicKeys = {
+					ImageColor3 = theme.Text.Secondary[1],
+					ImageTransparency = theme.Text.Secondary[2],
+				},
+			})
+			chevronHost = host(chevron)
+		end
+
+		return chevronHost
 	end
 
 	local dropInfo = TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -765,9 +797,70 @@ return function(self, properties: any, actions)
 			}),
 		})
 		local contentHost = host(content)
+		local caseHosts = {}
+
+		local function buildDisclosure(entry, order, parentInstance)
+			local open = entry.casesOpen == true
+			local block = create("Frame")({
+				Name = `Check_{order}`,
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				LayoutOrder = order,
+				Parent = parentInstance,
+
+				create("UIListLayout")({
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					Padding = UDim.new(0, 0),
+				}),
+			})
+			local blockHost = host(block)
+			local caseChevron = buildRow(entry, 1, blockHost, elapsedLabels)
+
+			local caseClip = create("Frame")({
+				Name = "Clip",
+				ClipsDescendants = true,
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = if open then Enum.AutomaticSize.Y else Enum.AutomaticSize.None,
+				LayoutOrder = 2,
+				Parent = blockHost,
+			})
+			local caseClipHost = host(caseClip)
+			local caseContent = create("Frame")({
+				Name = "Content",
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Parent = caseClipHost,
+
+				create("UIListLayout")({
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					Padding = UDim.new(0, 0),
+				}),
+			})
+			local caseContentHost = host(caseContent)
+			for index, caseEntry in entry.caseEntries do
+				buildRow(caseEntry, index, caseContentHost, elapsedLabels)
+			end
+
+			caseHosts[entry.key] = {
+				clip = caseClipHost,
+				content = caseContentHost,
+				chevron = caseChevron,
+				expandedHeight = if open then 0 else #entry.caseEntries * 34,
+				fallbackHeight = #entry.caseEntries * 34,
+			}
+		end
 
 		for index, entry in group.entries do
-			buildRow(entry, index + 1, contentHost, elapsedLabels)
+			if entry.hasCases then
+				buildDisclosure(entry, index + 1, contentHost)
+			else
+				buildRow(entry, index + 1, contentHost, elapsedLabels)
+			end
 		end
 
 		groupHosts[group.name] = {
@@ -775,16 +868,16 @@ return function(self, properties: any, actions)
 			chevron = chevronHost,
 			elapsed = elapsedLabels,
 			expandedHeight = bodyHeight,
+			cases = caseHosts,
 		}
 	end
 
-	function structures.toggleGroup(name, open)
-		local record = groupHosts[name]
-		if not record then
+	local function tweenDisclosure(record, open)
+		local clip = record.clip
+		if not clip then
 			return
 		end
 
-		local clip = record.clip
 		if record.tween then
 			record.tween:Cancel()
 		end
@@ -794,10 +887,20 @@ return function(self, properties: any, actions)
 			record.expandedHeight = current
 		end
 
+		local target = if open then (record.expandedHeight or 0) else 0
+		if open and target <= 0 then
+			local measured = if record.content then record.content.AbsoluteSize.Y else 0
+			if measured <= 0 then
+				measured = record.fallbackHeight or 0
+			end
+			target = measured
+			record.expandedHeight = target
+		end
+
 		clip.AutomaticSize = Enum.AutomaticSize.None
 		clip.Size = UDim2.new(1, 0, 0, current)
 		local tween = tweenService:Create(clip, dropInfo, {
-			Size = UDim2.new(1, 0, 0, if open then record.expandedHeight else 0),
+			Size = UDim2.new(1, 0, 0, target),
 		})
 		record.tween = tween
 		tween:Play()
@@ -809,13 +912,33 @@ return function(self, properties: any, actions)
 			end)
 		end
 
-		if record.chevronTween then
-			record.chevronTween:Cancel()
+		if record.chevron then
+			if record.chevronTween then
+				record.chevronTween:Cancel()
+			end
+			record.chevronTween = tweenService:Create(record.chevron, dropInfo, {
+				Rotation = if open then 180 else 0,
+			})
+			record.chevronTween:Play()
 		end
-		record.chevronTween = tweenService:Create(record.chevron, dropInfo, {
-			Rotation = if open then 180 else 0,
-		})
-		record.chevronTween:Play()
+	end
+
+	function structures.toggleGroup(name, open)
+		local record = groupHosts[name]
+		if not record then
+			return
+		end
+		tweenDisclosure(record, open)
+	end
+
+	function structures.toggleCases(key, open)
+		for _, record in groupHosts do
+			local caseRecord = record.cases and record.cases[key]
+			if caseRecord then
+				tweenDisclosure(caseRecord, open)
+				return
+			end
+		end
 	end
 
 	function structures.setTimes(show)
@@ -856,6 +979,9 @@ return function(self, properties: any, actions)
 		local mixed = fail:Lerp(pass, math.clamp((view.rate or 0) / 100, 0, 1))
 		local score = `<font color="rgb({colorRgb(mixed)})">{view.passed}/{view.tested} ({view.rate}%)</font>`
 		local text = `{escapeRich(view.executor)} - {score} • {escapeRich(view.timeText or "")}`
+		if view.caseText and view.caseText ~= "" then
+			text ..= ` • {escapeRich(view.caseText)}`
+		end
 		if view.extra and view.extra ~= "" then
 			text ..= ` • {escapeRich(view.extra)}`
 		end

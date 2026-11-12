@@ -1,48 +1,58 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not getreg then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "getreg",
+	cases = {
+		{
+			id = "table",
+			run = function(self)
+				local registry = getreg()
 
-	local registry = getreg()
+				if type(registry) ~= "table" then
+					return {
+						status = 500,
+						message = "Did not return a table",
+					}
+				end
 
-	if type(registry) ~= "table" then
-		return {
-			status = 500,
-			message = "Did not return a table",
-		}
-	end
+				self._registry = registry
 
-	local foundItems = false
-	for k, v in pairs(registry) do
-		foundItems = true
-		break
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "items",
+			run = function(self)
+				if type(self._registry) ~= "table" then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
 
-	if not foundItems then
-		return {
-			status = 500,
-			message = "Registry is empty",
-		}
-	end
+				local registry = self._registry
+				local foundItems = false
+				for k, v in pairs(registry) do
+					foundItems = true
+					break
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if not foundItems then
+					return {
+						status = 500,
+						message = "Registry is empty",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

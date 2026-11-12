@@ -2,14 +2,16 @@
 
 # Changelog
 
-## [UNRELEASED]
-
-> Target: 2.0.0
+## [2.0.0-beta.1] - `BETA`
 
 ### Added
 
 - [Standards] `hookfunction` check now has multiple new cases, including the entire x->y target matrix.
 - [Standards] `gethiddenproperty` and `sethiddenproperty` now have multiple new cases
+
+### Changed
+
+- [Standards] Every test uses a new framework, this framework seperates cases with ID's and reduces boilerplate for all tests.
 
 ### Fixed
 

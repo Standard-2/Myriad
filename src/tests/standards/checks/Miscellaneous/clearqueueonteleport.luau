@@ -1,29 +1,10 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not clearqueueonteleport then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+return {
+	global = "clearqueueonteleport",
+	aliases = {
 		"clearteleportqueue",
-		"clear_teleport_queue"
-	})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+		"clear_teleport_queue",
+	},
+}
