@@ -41,9 +41,14 @@ return {
 				-- We do this so that getnilinstances doesn't find it.
 				originalPart.Parent = workspace
 
+				local marker = "Myriad" .. tostring(math.random(100000, 999999))
+				originalPart.Name = marker
+				self._marker = marker
+
 				-- An "error" is only possible if setrawmetatable exists and was previously modified
 				if setrawmetatable then
 					local sameTable = {}
+					self._canary = sameTable
 					setrawmetatable(originalPart, {
 						__type = "Instance",
 						__index = function()
@@ -56,10 +61,6 @@ return {
 				local collectGarbageDetecor = setmetatable({ {}, originalPart }, { __mode = "v" })
 				self._newRef = originalPartNewRef
 				self._detector = collectGarbageDetecor
-
-				pcall(function()
-					originalPartNewRef.Name = math.random()
-				end)
 
 				if originalPart == originalPartNewRef then
 					pcall(function()
@@ -82,11 +83,27 @@ return {
 			run = function(self)
 				local originalPart = self._part
 				local originalPartNewRef = self._newRef
-				if not originalPart or not originalPartNewRef then
+				local marker = self._marker
+				local canary = self._canary
+				if not originalPart or not originalPartNewRef or not marker then
 					return { status = 200, message = `Passed` }
 				end
 
-				if originalPart.Name ~= originalPartNewRef.Name then
+				local renamed = marker .. "b"
+				local writeOk = pcall(function()
+					originalPartNewRef.Name = renamed
+				end)
+				local seen
+				local readOk = pcall(function()
+					seen = originalPartNewRef.Name
+				end)
+				local thirdSeen
+				local thirdOk = pcall(function()
+					thirdSeen = cloneref(originalPart).Name
+				end)
+				local spoofed = canary ~= nil and (seen == canary or thirdSeen == canary)
+
+				if not writeOk or not readOk or not thirdOk or spoofed or seen ~= renamed or thirdSeen ~= renamed then
 					pcall(function()
 						originalPart:Destroy()
 					end)
@@ -114,6 +131,8 @@ return {
 				pcall(function()
 					originalPart:Destroy()
 				end)
+
+				originalPart = nil
 				self._part = nil
 
 				local timeout = false
@@ -122,7 +141,14 @@ return {
 					collectGarbageDetecor[1] = nil
 				end)
 
-				while collectGarbageDetecor[1] do
+				while true do
+					local sentinel = collectGarbageDetecor[1]
+					if not sentinel then
+						break
+					end
+					sentinel = nil
+					local pressure = table.create(1024)
+					pressure = nil
 					task.wait()
 				end
 

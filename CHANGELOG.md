@@ -2,6 +2,13 @@
 
 # Changelog
 
+## [2.0.1] - `STABLE` `HOTFIX`
+
+### Fixed
+
+- [Standards] `cloneref` no longer treats a working clone as a metadata mismatch after the metatable spoof replaces `Name`.
+- [Standards] `cloneref` drops its local instance reference before the garbage-collection wait, and allocates a garbage step so the collector can finish inside the timeout.
+
 ## [2.0.0] - `STABLE`
 
 ### Added
@@ -493,6 +500,7 @@
 
 <!-- References -->
 
+[2.0.1]: https://github.com/Standard-2/Myriad/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Standard-2/Myriad/compare/v1.8.2...v2.0.0
 [1.8.2]: https://github.com/Standard-2/Myriad/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/Standard-2/Myriad/compare/v1.8.0...v1.8.1
