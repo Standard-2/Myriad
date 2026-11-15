@@ -1,58 +1,91 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not crypt or not crypt.random then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "crypt.random",
+	cases = {
+		{
+			id = "call",
+			run = function(self)
+				local baseSuccess, baseMessage = pcall(function()
+					return crypt.random(64)
+				end)
+				if baseSuccess then
+					self._baseOk = true
+					self._base = baseMessage
+				end
 
-	local maxLimSuccess, maxLimMessage = pcall(function()
-		return crypt.random(512)
-	end)
-	local minLimSuccess, minLimMessage = pcall(function()
-		return crypt.random(-1)
-	end)
-	local baseSuccess, baseMessage = pcall(function()
-		return crypt.random(64)
-	end)
+				if not baseSuccess then
+					return {
+						status = 0,
+						message = "Failed: " .. tostring(baseMessage),
+					}
+				end
 
-	if not baseSuccess then
-		return {
-			status = 0,
-			message = "Failed: " .. tostring(baseMessage),
-		}
-	elseif minLimSuccess then
-		return {
-			status = 500,
-			message = "Arg[1] passed -1, should have failed.",
-		}
-	elseif not maxLimSuccess then
-		return {
-			status = 500,
-			message = "Arg[1] passed 512, should have passed.",
-		}
-	elseif #baseMessage ~= 64 then
-		return {
-			status = 500,
-			message = "Len mismatch. Expected 64, got: " .. tostring(#baseMessage),
-		}
-	end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "negative",
+			run = function(self)
+				local minLimSuccess, minLimMessage = pcall(function()
+					return crypt.random(-1)
+				end)
+				if minLimSuccess then
+					return {
+						status = 500,
+						message = "Arg[1] passed -1, should have failed.",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "maximum",
+			run = function(self)
+				local maxLimSuccess, maxLimMessage = pcall(function()
+					return crypt.random(512)
+				end)
+				if not maxLimSuccess then
+					return {
+						status = 500,
+						message = "Arg[1] passed 512, should have passed.",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "length",
+			run = function(self)
+				if not self._baseOk then
+					return { status = 200, message = "Passed" }
+				end
 
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				local baseMessage = self._base
+				if #baseMessage ~= 64 then
+					return {
+						status = 500,
+						message = "Len mismatch. Expected 64, got: " .. tostring(#baseMessage),
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}

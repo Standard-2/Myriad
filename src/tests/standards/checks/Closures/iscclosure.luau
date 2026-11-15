@@ -1,51 +1,77 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not iscclosure then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "iscclosure",
+	cases = {
+		{
+			id = "lua",
+			run = function(self)
+				local function luaClosure()
+					return 1
+				end
+				local cClosure1 = print
+				local cClosure2 = newcclosure(function()
+					return 1
+				end)
+				self._luaClosure = luaClosure
+				self._cClosure = cClosure1
+				self._newClosure = cClosure2
+				self._hasC = true
+				self._hasNew = true
 
-	local function luaClosure()
-		return 1
-	end
-	local cClosure1 = print
-	local cClosure2 = newcclosure(function()
-		return 1
-	end)
+				if iscclosure(luaClosure) then
+					return {
+						status = 500,
+						message = "Lua closure identified as C closure",
+					}
+				end
 
-	if iscclosure(luaClosure) then
-		return {
-			status = 500,
-			message = "Lua closure identified as C closure",
-		}
-	elseif not iscclosure(cClosure1) then
-		return {
-			status = 500,
-			message = "C closure not identified as C closure",
-		}
-	elseif not iscclosure(cClosure2) then
-		return {
-			status = 500,
-			message = "C closure not identified as C closure",
-		}
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "c",
+			run = function(self)
+				if not self._hasC then
+					return { status = 200, message = "Passed" }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if not iscclosure(self._cClosure) then
+					return {
+						status = 500,
+						message = "C closure not identified as C closure",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "new",
+			run = function(self)
+				if not self._hasNew then
+					return { status = 200, message = "Passed" }
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				if not iscclosure(self._newClosure) then
+					return {
+						status = 500,
+						message = "C closure not identified as C closure",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

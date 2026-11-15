@@ -1,93 +1,119 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not firetouchinterest then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "firetouchinterest",
+	cases = {
+		{
+			id = "touch part",
+			run = function(self)
+				--// Functionality test
+				local touchPart = game.Players.LocalPlayer.Character.Head
+				local originalPart = Instance.new("Part")
+				self._touchPart = touchPart
+				self._part = originalPart
 
-	--// Functionality test
-	local touchPart = game.Players.LocalPlayer.Character.Head
-	local touched = false
-	local touchEnded = false
-	local failure = nil
-	local originalPart = Instance.new("Part")
+				originalPart.Anchored = true
+				originalPart.Transparency = 1
+				originalPart.CanCollide = false
+				originalPart.Position = Vector3.new(0, -100, 0)
+				originalPart.Parent = workspace
 
-	originalPart.Anchored = true
-	originalPart.Transparency = 1
-	originalPart.CanCollide = false
-	originalPart.Position = Vector3.new(0,-100,0)
-	originalPart.Parent = workspace
+				originalPart.Touched:Connect(function(part: BasePart)
+					if part ~= touchPart then
+						originalPart:Destroy()
+						self._touchWrong = true
+						return
+					end
 
-	originalPart.Touched:Connect(function(part: BasePart)
-		if part ~= touchPart then
-			originalPart:Destroy()
+					self._touched = true
+				end)
 
-			failure = {
-				status = 500,
-				message = "Touch part given wasn't the passed touch part",
-			}
-			return
-		end
+				originalPart.TouchEnded:Connect(function(part: BasePart)
+					if part ~= touchPart then
+						originalPart:Destroy()
+						self._touchEndWrong = true
+						return
+					end
 
-		touched = true
-	end)
+					self._touchEnded = true
+				end)
 
-	originalPart.TouchEnded:Connect(function(part: BasePart)
-		if part ~= touchPart then
-			originalPart:Destroy()
+				firetouchinterest(touchPart, originalPart, false)
+				game:GetService("RunService").PostSimulation:Wait()
+				self._began = true
 
-			failure = {
-				status = 500,
-				message = "Touch part given wasn't the passed touch part",
-			}
-			return
-		end
+				if self._touchWrong then
+					self._part = nil
+					return {
+						status = 500,
+						message = "Touch part given wasn't the passed touch part",
+					}
+				end
 
-		touchEnded = true
-	end)
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "touched",
+			run = function(self)
+				if not self._began or self._touchWrong then
+					return { status = 200, message = `Passed` }
+				end
 
-	firetouchinterest(touchPart, originalPart, false)
-	game:GetService("RunService").PostSimulation:Wait()
-	
-	if failure then return failure end
+				if not self._touched then
+					return {
+						status = 500,
+						message = "Touched event wasn't fired",
+					}
+				end
 
-	if not touched then
-		return {
-			status = 500,
-			message = "Touched event wasn't fired",
-		}
-	end
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "touch end part",
+			run = function(self)
+				if not self._began or self._touchWrong or not self._touched or not self._part then
+					return { status = 200, message = `Passed` }
+				end
 
-	firetouchinterest(touchPart, originalPart, true)
-	game:GetService("RunService").PostSimulation:Wait()
-	
-	if failure then return failure end
+				firetouchinterest(self._touchPart, self._part, true)
+				game:GetService("RunService").PostSimulation:Wait()
+				self._ended = true
 
-	if not touchEnded then
-		return {
-			status = 500,
-			message = "Touched event wasn't fired",
-		}
-	end
+				if self._touchEndWrong then
+					self._part = nil
+					return {
+						status = 500,
+						message = "Touch part given wasn't the passed touch part",
+					}
+				end
 
-	originalPart:Destroy()
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "touch ended",
+			run = function(self)
+				if not self._ended or self._touchEndWrong then
+					return { status = 200, message = `Passed` }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if not self._touchEnded then
+					return {
+						status = 500,
+						message = "Touched event wasn't fired",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				if self._part then
+					self._part:Destroy()
+					self._part = nil
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return { status = 200, message = `Passed` }
+			end,
+		},
+	},
+}

@@ -1,60 +1,70 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not checkcaller then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	elseif not hookmetamethod then
-		return {
-			status = 401,
-			message = "Dependency 'hookmetamethod' missing",
-		}
-	end
+return {
+	global = "checkcaller",
+	dependencies = {
+		globals = {
+			{ name = "hookmetamethod", message = "Dependency 'hookmetamethod' missing" },
+		},
+	},
+	cases = {
+		{
+			id = "thread",
+			run = function(self)
+				local callerFromThread = checkcaller()
 
-	local callerFromThread = checkcaller()
+				local fromHook
+				local original
+				original = hookmetamethod(game, "__namecall", function(...)
+					if fromHook == nil then
+						fromHook = checkcaller()
+					end
+					return original(...)
+				end)
 
-	local fromHook
-	local original
-	original = hookmetamethod(game, "__namecall", function(...)
-		if fromHook == nil then
-			fromHook = checkcaller()
-		end
-		return original(...)
-	end)
+				tostring(game)
 
-	tostring(game)
+				task.wait(0.1)
 
-	task.wait(0.1)
+				hookmetamethod(game, "__namecall", original)
 
-	hookmetamethod(game, "__namecall", original)
+				self._callerFromThread = callerFromThread
+				self._fromHook = fromHook
+				self._checked = true
 
-	if callerFromThread ~= true then
-		return {
-			status = 500,
-			message = "Returned false in executor thread",
-		}
-	elseif fromHook ~= false then
-		return {
-			status = 500,
-			message = "Did not return false in a hook",
-		}
-	end
+				if callerFromThread ~= true then
+					return {
+						status = 500,
+						message = "Returned false in executor thread",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "hook",
+			run = function(self)
+				if not self._checked then
+					return { status = 200, message = "Passed" }
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				if self._fromHook ~= false then
+					return {
+						status = 500,
+						message = "Did not return false in a hook",
+					}
+				end
 
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}

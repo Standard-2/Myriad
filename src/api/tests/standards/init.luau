@@ -1,5 +1,6 @@
 --// Requires
 local Signal = require("@packages/signal")
+local framework = require("@standards/framework")
 
 --// Variables
 local self = {
@@ -20,6 +21,7 @@ export type StandardTestOptions = {
 --// Public Methods
 function self.Run(options: StandardTestOptions?)
     options = options or {} :: StandardTestOptions
+    framework.begin(self.Checks)
 
     for groupName, group in self.Checks do
         for name, test in group do
@@ -34,8 +36,14 @@ function self.Run(options: StandardTestOptions?)
             local isFinished = false
             local result
             
+            local testId = `{groupName}.{name}`
             local thread = task.spawn(function()
-                result = test()
+                if type(test) == "table" then
+                    local cached = framework.peek(testId)
+                    result = if cached then cached else framework.run(test, testId)
+                else
+                    result = test()
+                end
                 isFinished = true
             end)
 

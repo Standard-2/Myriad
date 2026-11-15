@@ -1,45 +1,57 @@
 --!nocheck
 --!nolint
 
-return function()
-	local cryptReference = require("@dependencies/crypt/crypt.luau")
-	if not getscriptclosure then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "getscriptclosure",
+	aliases = {
+		"getscriptfunction",
+	},
+	cases = {
+		{
+			id = "closure",
+			run = function(self)
+				local cryptReference = require("@dependencies/crypt/crypt.luau")
 
-	--// Functionality test
-	local originalScript = game.Players.LocalPlayer.Character.Character:FindFirstChild("maybeisdtc")
-	local closure = getscriptclosure(originalScript)
+				--// Functionality test
+				local originalScript = game.Players.LocalPlayer.Character.Character:FindFirstChild("maybeisdtc")
+				local closure = getscriptclosure(originalScript)
+				self._closure = closure
 
-	if typeof(closure) ~= "function" then
-		return {
-			status = 500,
-			message = "Expected a closure"
-		}
-	elseif closure() ~= "GOT A DROP ON THIS FLEXING FELLA" then
-		return {
-			status = 500,
-			message = "Closure did not return the expected value"
-		}
-	end
+				if typeof(closure) ~= "function" then
+					return {
+						status = 500,
+						message = "Expected a closure",
+					}
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
-		"getscriptfunction"
-	})
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "return value",
+			run = function(self)
+				if typeof(self._closure) ~= "function" then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				if self._closure() ~= "GOT A DROP ON THIS FLEXING FELLA" then
+					return {
+						status = 500,
+						message = "Closure did not return the expected value",
+					}
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

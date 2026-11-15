@@ -1,28 +1,20 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not debug or not debug.getstack then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+return {
+	global = "debug.getstack",
+	aliases = {
 		"getstack",
-	})
-
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = message or `Passed`,
-	}
-end
+	},
+	cases = {
+		{
+			id = "result",
+			run = function(self)
+				return {
+					status = 200,
+					message = message or `Passed`,
+				}
+			end,
+		},
+	},
+}

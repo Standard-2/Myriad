@@ -1,62 +1,93 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not saveinstance then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	elseif not listfiles then
-		return {
-			status = 501,
-			message = "Dependant global 'listfiles' not found",
-		}
-	elseif not delfile then
-		return {
-			status = 501,
-			message = "Dependant global 'delfile' not found",
-		}
-	end
+return {
+	cases = {
+		{
+			id = "global",
+			run = function(self)
+				if not saveinstance then
+					return {
+						status = 400,
+						message = "Global not found",
+					}
+				end
 
-	--// Functionality test
-	local guid = game:GetService("HttpService"):GenerateGUID(false):gsub("-", "")
-	local part = Instance.new("Part")
+				self._saveinstance = true
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "listfiles",
+			run = function(self)
+				if not self._saveinstance then
+					return { status = 200, message = `Passed` }
+				end
 
-	saveinstance(part, {
-		FileName = guid
-	})
+				if not listfiles then
+					return {
+						status = 501,
+						message = "Dependant global 'listfiles' not found",
+					}
+				end
 
-	task.wait(0.5)
+				self._listfiles = true
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "delfile",
+			run = function(self)
+				if not self._saveinstance or not self._listfiles then
+					return { status = 200, message = `Passed` }
+				end
 
-	local found = false
+				if not delfile then
+					return {
+						status = 501,
+						message = "Dependant global 'delfile' not found",
+					}
+				end
 
-	for _, file in pairs(listfiles("")) do
-		if file:find(guid) then
-			found = true
-			delfile(file)
-		end
-	end
-	
-	if not found then
-		return {
-			status = 500,
-			message = "Couldn't find saved part. Args passed: (Instance, { FileName = string })"
-		}
-	end
+				self._delfile = true
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "save",
+			run = function(self)
+				if not self._saveinstance or not self._listfiles or not self._delfile then
+					return { status = 200, message = `Passed` }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				--// Functionality test
+				local guid = game:GetService("HttpService"):GenerateGUID(false):gsub("-", "")
+				local part = Instance.new("Part")
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				saveinstance(part, {
+					FileName = guid,
+				})
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				task.wait(0.5)
+
+				local found = false
+
+				for _, file in pairs(listfiles("")) do
+					if file:find(guid) then
+						found = true
+						delfile(file)
+					end
+				end
+
+				if not found then
+					return {
+						status = 500,
+						message = "Couldn't find saved part. Args passed: (Instance, { FileName = string })",
+					}
+				end
+
+				return { status = 200, message = `Passed` }
+			end,
+		},
+	},
+}

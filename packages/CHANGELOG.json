@@ -3,6 +3,43 @@
   "description": "<!-- markdownlint-disable MD024 -->",
   "releases": [
     {
+      "version": "2.0.0",
+      "tags": [
+        "STABLE"
+      ],
+      "link": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.2...v2.0.0",
+      "changes": {
+        "added": [
+          "[Standards] `hookfunction` check now has multiple new cases, including the entire x->y target matrix.",
+          "[Standards] `gethiddenproperty` and `sethiddenproperty` now have multiple new cases"
+        ],
+        "changed": [
+          "[Standards] Every test uses a new framework, this framework seperates cases with ID's and reduces boilerplate for all tests."
+        ],
+        "fixed": [
+          "`gethiddenproperty` case updated to no longer use a removed roblox engine property."
+        ]
+      }
+    },
+    {
+      "version": "2.0.0-beta.1",
+      "tags": [
+        "BETA"
+      ],
+      "changes": {
+        "added": [
+          "[Standards] `hookfunction` check now has multiple new cases, including the entire x->y target matrix.",
+          "[Standards] `gethiddenproperty` and `sethiddenproperty` now have multiple new cases"
+        ],
+        "changed": [
+          "[Standards] Every test uses a new framework, this framework seperates cases with ID's and reduces boilerplate for all tests."
+        ],
+        "fixed": [
+          "`gethiddenproperty` case updated to no longer use a removed roblox engine property."
+        ]
+      }
+    },
+    {
       "version": "1.8.2",
       "tags": [
         "STABLE"
@@ -689,6 +726,7 @@
     "1.7.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.0...v1.7.1",
     "1.8.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.7.1...v1.8.0",
     "1.8.1": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.0...v1.8.1",
-    "1.8.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.1...v1.8.2"
+    "1.8.2": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.1...v1.8.2",
+    "2.0.0": "https:\/\/github.com\/Standard-2\/Myriad\/compare\/v1.8.2...v2.0.0"
   }
 }

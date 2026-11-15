@@ -1,48 +1,75 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not getgenv then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+return {
+	global = "getgenv",
+	cases = {
+		{
+			id = "getfenv",
+			run = function(self)
+				getfenv().MYRI = "Hello, World!"
+				getgenv().MYRI1 = "Hello, World!"
+				getgenv().MYRI2 = 123456789
+				self._ready = true
 
-    getfenv().MYRI = "Hello, World!"
-    getgenv().MYRI1 = "Hello, World!"
-    getgenv().MYRI2 = 123456789
+				if getgenv().MYRI == "Hello, World!" then
+					return {
+						status = 500,
+						message = "getfenv affected getgenv",
+					}
+				end
 
-    if getgenv().MYRI == "Hello, World!" then
-        return {
-            status = 500,
-            message = "getfenv affected getgenv",
-        }
-    end
-    if getgenv().MYRI1 ~= "Hello, World!" then
-        return {
-            status = 500,
-            message = "MYRI1 not found or unexpected value",
-        }
-    elseif getgenv().MYRI2 ~= 123456789 then
-        return {
-            status = 500,
-            message = "MYRI2 not found or unexpected value",
-        }
-    end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "myri1",
+			run = function(self)
+				if not self._ready then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
 
-    --// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if getgenv().MYRI1 ~= "Hello, World!" then
+					return {
+						status = 500,
+						message = "MYRI1 not found or unexpected value",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "myri2",
+			run = function(self)
+				if not self._ready then
+					return {
+						status = 200,
+						message = `Passed`,
+					}
+				end
 
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				if getgenv().MYRI2 ~= 123456789 then
+					return {
+						status = 500,
+						message = "MYRI2 not found or unexpected value",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}

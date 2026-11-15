@@ -1,37 +1,26 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not getthreadidentity then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
-
-	--// Functionality test
-	if typeof(getthreadidentity()) ~= "number" then
-		return {
-			status = 500,
-			message = "Did not return a number",
-		}
-	end
-
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({
+return {
+	global = "getthreadidentity",
+	aliases = {
 		"getidentity",
-		"getthreadcontext"
-	})
+		"getthreadcontext",
+	},
+	cases = {
+		{
+			id = "number",
+			run = function(self)
+				--// Functionality test
+				if typeof(getthreadidentity()) ~= "number" then
+					return {
+						status = 500,
+						message = "Did not return a number",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return { status = 200, message = "Passed" }
+			end,
+		},
+	},
+}

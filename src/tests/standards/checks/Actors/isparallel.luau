@@ -1,33 +1,46 @@
 --!nocheck
 --!nolint
 
-return function()
-	if not isparallel then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	elseif not run_on_actor then
-		return {
-			status = 401,
-			message = "Dependency 'run_on_actor' not found",
-		}
-	end
+return {
+	global = "isparallel",
+	dependencies = {
+		globals = {
+			{ name = "run_on_actor", message = "Dependency 'run_on_actor' not found" },
+		},
+	},
+	cases = {
+		{
+			id = "serial",
+			run = function(self)
+				local gameRefs = require("@gameRefs")
+				local actor = gameRefs.PMOVON
 
-	local gameRefs = require("@gameRefs")
-	local actor = gameRefs.PMOVON
+				if isparallel() then
+					return {
+						status = 500,
+						message = "Non-parallel thread assumed to be in a parallel state",
+					}
+				end
 
-	if isparallel() then
-		return {
-			status = 500,
-			message = "Non-parallel thread assumed to be in a parallel state",
-		}
-	end
+				self._actor = actor
+				self._serial = true
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "parallel",
+			run = function(self)
+				if not self._serial then
+					return { status = 200, message = "Passed" }
+				end
 
-	-- Technically we should be able to set synchronization directly in this thread, but some executors might break doing so.
-	run_on_actor(
-		actor,
-		[[
+				-- Technically we should be able to set synchronization directly in this thread, but some executors might break doing so.
+				run_on_actor(
+					self._actor,
+					[[
 		print("MYRIAD: Ignore start -----------")
 		task.desynchronize()
 		if isparallel() then
@@ -38,41 +51,48 @@ return function()
 			originalPart.Parent = game.ReplicatedStorage
 		end
 	]]
-	)
+				)
 
-	task.wait(0.1)
+				task.wait(0.1)
 
-	if not game.ReplicatedStorage:FindFirstChild(os.date("%H") .. "(1)") then
-		return {
-			status = 500,
-			message = "Parallel thread assumed to be in a non-parallel state",
-		}
-	end
+				if not game.ReplicatedStorage:FindFirstChild(os.date("%H") .. "(1)") then
+					return {
+						status = 500,
+						message = "Parallel thread assumed to be in a non-parallel state",
+					}
+				end
 
-	task.wait()
+				self._parallel = true
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "resumed",
+			run = function(self)
+				if not self._parallel then
+					return { status = 200, message = "Passed" }
+				end
 
-	if isparallel() then
-		return {
-			status = 500,
-			message = "Non-parallel thread assumed to be in a parallel state",
-		}
-	end
+				task.wait()
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				if isparallel() then
+					return {
+						status = 500,
+						message = "Non-parallel thread assumed to be in a parallel state",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
-
-	return {
-		status = 200,
-		message = `Passed`,
-	}
-end
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+	},
+}
 
 --// Old check
 -- This may just be an AWP problem and this test is actually correct, but I don't feel like checking
@@ -168,7 +188,7 @@ return function()
 	end
 
 	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+	local envIndex, failedIndex = require("@standards/framework").aliases({})
 
 	if not envIndex then
 		return {

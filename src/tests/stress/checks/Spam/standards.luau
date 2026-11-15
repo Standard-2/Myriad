@@ -1,6 +1,7 @@
 --!nocheck
 
 local standardChecks = require("@tests/standards/checks/init")
+local framework = require("@standards/framework")
 
 return function(config, utils)
 	local passes = config.passes or 10
@@ -51,9 +52,12 @@ return function(config, utils)
     local success, err = pcall(function()
         for pass = 1, passes do
             local currentDelay = math.max(0, baseDelay * (backoffRate ^ (pass - 1)))
+            framework.begin(standardChecks)
             
             for _, testInfo in ipairs(testsToRun) do
-                local testSuccess = pcall(testInfo.func)
+                local testSuccess = if type(testInfo.func) == "table"
+                    then pcall(framework.run, testInfo.func)
+                    else pcall(testInfo.func)
                 if not testSuccess then
                     failedSpam += 1
                 else

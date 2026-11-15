@@ -1,54 +1,81 @@
 --!nocheck
 --!nolint
 
-return function()
-	local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+return {
+	global = "crypt.decrypt",
+	cases = {
+		{
+			id = "call",
+			run = function(self)
+				local referenceCrypt = require("@dependencies/crypt/crypt.luau")
+				local data = "jxF03fu7V3WKm7b2oRMo9HYz+KVDymqKU29qmsiTP4E="
+				local key = referenceCrypt.base64encode("GMVIsgHnxm0YDYwUGkBhtRWSrSsfRMjY")
+				local iv = referenceCrypt.base64encode("1234567890abcdef")
+				local mode = "CBC"
 
-	if not crypt or not crypt.decrypt then
-		return {
-			status = 400,
-			message = "Global not found",
-		}
-	end
+				local decryptSuccess, cryptDecrypted = pcall(function()
+					return crypt.decrypt(data, key, iv, mode)
+				end)
 
-	local data = "jxF03fu7V3WKm7b2oRMo9HYz+KVDymqKU29qmsiTP4E="
-	local key = referenceCrypt.base64encode("GMVIsgHnxm0YDYwUGkBhtRWSrSsfRMjY")
-	local iv = referenceCrypt.base64encode("1234567890abcdef")
-	local mode = "CBC"
+				if decryptSuccess then
+					self._called = true
+					self._decrypted = cryptDecrypted
+				end
 
-	local decryptSuccess, cryptDecrypted = pcall(function()
-		return crypt.decrypt(data, key, iv, mode)
-	end)
+				if not decryptSuccess then
+					return {
+						status = 0,
+						message = "Decrypt failed: " .. tostring(cryptDecrypted),
+					}
+				end
 
-	if not decryptSuccess then
-		return {
-			status = 0,
-			message = "Decrypt failed: " .. tostring(cryptDecrypted),
-		}
-	elseif not cryptDecrypted then
-		return {
-			status = 500,
-			message = "Decrypt returned nothing",
-		}
-	elseif cryptDecrypted ~= "1234567890abcdef" then
-		return {
-			status = 500,
-			message = "Decrypted data doesn't match reference data",
-		}
-    end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "result",
+			run = function(self)
+				if not self._called then
+					return { status = 200, message = "Passed" }
+				end
 
-	--// Alias test
-	local envIndex, failedIndex = require("@dependencies/aliasTest.luau")({})
+				local cryptDecrypted = self._decrypted
+				if not cryptDecrypted then
+					return {
+						status = 500,
+						message = "Decrypt returned nothing",
+					}
+				end
 
-	if not envIndex then
-		return {
-			status = 501,
-			message = `Alias not found: {failedIndex}`,
-		}
-	end
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "match",
+			run = function(self)
+				if not self._called or not self._decrypted then
+					return { status = 200, message = "Passed" }
+				end
 
-	return {
-		status = 200,
-		message = "Passed",
-	}
-end
+				local cryptDecrypted = self._decrypted
+				if cryptDecrypted ~= "1234567890abcdef" then
+					return {
+						status = 500,
+						message = "Decrypted data doesn't match reference data",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+	},
+}
