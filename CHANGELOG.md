@@ -2,6 +2,21 @@
 
 # Changelog
 
+## [2.0.0] - `STABLE`
+
+### Added
+
+- [Standards] `hookfunction` check now has multiple new cases, including the entire x->y target matrix.
+- [Standards] `gethiddenproperty` and `sethiddenproperty` now have multiple new cases
+
+### Changed
+
+- [Standards] Every test uses a new framework, this framework seperates cases with ID's and reduces boilerplate for all tests.
+
+### Fixed
+
+- `gethiddenproperty` case updated to no longer use a removed roblox engine property.
+
 ## [2.0.0-beta.1] - `BETA`
 
 ### Added
@@ -478,6 +493,7 @@
 
 <!-- References -->
 
+[2.0.0]: https://github.com/Standard-2/Myriad/compare/v1.8.2...v2.0.0
 [1.8.2]: https://github.com/Standard-2/Myriad/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/Standard-2/Myriad/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/Standard-2/Myriad/compare/v1.7.1...v1.8.0
