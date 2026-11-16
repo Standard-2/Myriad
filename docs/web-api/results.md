@@ -113,6 +113,7 @@ However, platforms like `Delta iOS`, and `Delta Android` already have seperate n
 | `android` | Android |
 | `ios` | iOS |
 | `macos` | macOS |
+| `linux` | Linux |
 | `console` | Xbox or PlayStation |
 | `unknown` | Missing or unrecognized |
 

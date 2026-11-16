@@ -8,6 +8,7 @@ local NAMES = {
 	Android = "android",
 	IOS = "ios",
 	OSX = "macos",
+	Linux = "linux",
 	XBoxOne = "console",
 	PS3 = "console",
 	PS4 = "console",

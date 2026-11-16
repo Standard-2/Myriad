@@ -2,6 +2,16 @@
 
 # Changelog
 
+## [2.0.2] - `STABLE`
+
+### Added
+
+- Added `linux` as a listed platform.
+
+### Fixed
+
+- [Standards] `cloneref` keeps the part in a detached folder so a workspace listener cannot retain the original userdata through the xref check. [#33]
+
 ## [2.0.1] - `STABLE` `HOTFIX`
 
 ### Fixed
@@ -500,6 +510,7 @@
 
 <!-- References -->
 
+[2.0.2]: https://github.com/Standard-2/Myriad/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/Standard-2/Myriad/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Standard-2/Myriad/compare/v1.8.2...v2.0.0
 [1.8.2]: https://github.com/Standard-2/Myriad/compare/v1.8.1...v1.8.2
