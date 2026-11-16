@@ -2,61 +2,14 @@
 --!nolint
 
 return {
+	global = {
+		{ name = "Signal", type = "table" },
+		{ name = "Signal.new", type = "function", message = "Signal.new is not a function" },
+	},
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				if type(Signal) ~= "table" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._table = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
-		-- Signal.new
-		{
-			id = "new",
-			run = function(self)
-				if not self._table then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
-				if type(Signal.new) ~= "function" then
-					return {
-						status = 400,
-						message = "Signal.new is not a function",
-					}
-				end
-
-				self._new = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
 		{
 			id = "construct",
 			run = function(self)
-				if not self._new then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
 				local success, sig = pcall(function()
 					return Signal.new()
 				end)

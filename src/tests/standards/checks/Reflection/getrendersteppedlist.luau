@@ -4,25 +4,12 @@
 local RunService = game:GetService("RunService")
 
 return {
+	global = "getrendersteppedlist",
+	type = "function",
 	cases = {
-		{
-			id = "function",
-			run = function(self)
-				if type(getrendersteppedlist) ~= "function" then
-					return { status = 400, message = "Global not found" }
-				end
-
-				self._ready = true
-				return { status = 200, message = "Passed" }
-			end,
-		},
 		{
 			id = "list",
 			run = function(self)
-				if not self._ready then
-					return { status = 200, message = "Passed" }
-				end
-
 				local s, list = pcall(getrendersteppedlist)
 				if not s then
 					return { status = 0, message = `Ambiguous error: {list}` }

@@ -2,35 +2,12 @@
 --!nolint
 
 return {
+	global = "replicatesignal",
+	type = "function",
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				if type(replicatesignal) ~= "function" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._fn = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
 		{
 			id = "replicate",
 			run = function(self)
-				if not self._fn then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
 				local s, err = pcall(function()
 					replicatesignal(Instance.new("ProximityPrompt").Triggered, game:GetService("Players").LocalPlayer)
 				end)

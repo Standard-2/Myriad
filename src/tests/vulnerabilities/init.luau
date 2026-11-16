@@ -8,6 +8,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 	local debugLogger = require("@modules/debugLogger")
 	local uploadResult = require("@modules/uploadResult")
 	local platform = require("@modules/platform")
+	local stopwatch = require("@modules/stopwatch")
 	local fallbackResult = require("@self/result")
 	local moduleFactories = {
 		Services = require("@self/services"),
@@ -111,33 +112,31 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 	local function runCheck(check)
 		local success, checkResult
 		local done = false
-		local startTime = os.clock()
+		local elapsedOf = stopwatch.start()
 
 		local thread = task.spawn(function()
 			success, checkResult = pcall(check.run)
 			done = true
 		end)
 
-		local elapsed = 0
-		while not done and elapsed < testConfig.testTimeout do
+		while not done and elapsedOf() < testConfig.testTimeout do
 			task.wait(0.061)
-			elapsed = os.clock() - startTime
 		end
 
 		if not done then
 			task.cancel(thread)
-			return fallbackResult.ambiguous(`Timed out after {testConfig.testTimeout}s`), os.clock() - startTime
+			return fallbackResult.ambiguous(`Timed out after {testConfig.testTimeout}s`), elapsedOf()
 		end
 
 		if not success then
-			return fallbackResult.ambiguous("Check errored", tostring(checkResult)), os.clock() - startTime
+			return fallbackResult.ambiguous("Check errored", tostring(checkResult)), elapsedOf()
 		end
 
 		if type(checkResult) ~= "table" or type(checkResult.status) ~= "number" then
-			return fallbackResult.ambiguous("Check returned an invalid result"), os.clock() - startTime
+			return fallbackResult.ambiguous("Check returned an invalid result"), elapsedOf()
 		end
 
-		return checkResult, os.clock() - startTime
+		return checkResult, elapsedOf()
 	end
 
 	local function runTests()
@@ -197,7 +196,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				)
 				:Play()
 
-			local startTime = time()
+			local total = stopwatch.start()
 			local totals = { checked = 0, secured = 0, vulnerable = 0, ambiguous = 0 }
 			local results = {}
 			local builtChecks = buildChecks()
@@ -240,7 +239,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				if testingState then
 					testingState.Passed = totals.secured
 					testingState.Failed = totals.vulnerable
-					testingState.TotalElapsed = time() - startTime
+					testingState.TotalElapsed = total()
 					testingState.CheckElapsed = elapsed
 				end
 
@@ -254,7 +253,7 @@ return function(name: string, tab: _types.Tab, titledRow: _types.Row, app: _type
 				testingState.Visible = false
 			end
 
-			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
+			local endTime = math.floor(total() * 10 ^ 2 + 0.5) / 10 ^ 2
 			local rate = totals.checked > 0 and math.round((totals.secured / totals.checked) * 100) or 0
 			local executor, version = identifyexecutor()
 			logger:write(`Finished vulnerability test. Took: {endTime}s, executor: {executor or "Unknown"}, version: {version or "Unknown"}, checked: {totals.checked}, secured: {totals.secured}, vulnerable: {totals.vulnerable}, ambiguous: {totals.ambiguous}`)

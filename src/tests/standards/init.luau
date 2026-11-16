@@ -13,6 +13,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local debugLogger = require("@modules/debugLogger")
 	local uploadResult = require("@modules/uploadResult")
 	local platform = require("@modules/platform")
+	local stopwatch = require("@modules/stopwatch")
 
 	--// Variables
 	local currentTask = nil
@@ -89,7 +90,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				)
 				:Play()
 
-			local startTime = time()
+			local total = stopwatch.start()
 			local passed = 0
 			local failed = 0
 			local numStandards = 0
@@ -168,7 +169,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					testingState.NextTest = nextEntry and nextEntry.name or "None"
 				end
 
-				local startTestTime = os.clock()
+				local check = stopwatch.start()
 				local success, result
 				local cached = framework.peek(testId)
 
@@ -183,13 +184,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 							done = true
 						end)
 
-						local elapsed = 0
-						while not done and elapsed < testConfig.testTimeout do
+						while not done and check() < testConfig.testTimeout do
 							task.wait(0.061)
-							elapsed = os.clock() - startTestTime
 							if testingState then
-								testingState.TotalElapsed = time() - startTime
-								testingState.CheckElapsed = elapsed
+								testingState.TotalElapsed = total()
+								testingState.CheckElapsed = check()
 							end
 						end
 
@@ -207,7 +206,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					end
 				end
 
-				local checkElapsed = if cached then (cached.elapsed or 0) else os.clock() - startTestTime
+				local checkElapsed = if cached then (cached.elapsed or 0) else check()
 				if not cached and success and type(result) == "table" then
 					result.elapsed = checkElapsed
 					framework.store(testId, result)
@@ -255,7 +254,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				if testingState then
 					testingState.Passed = passed
 					testingState.Failed = failed
-					testingState.TotalElapsed = time() - startTime
+					testingState.TotalElapsed = total()
 					testingState.CheckElapsed = checkElapsed
 				end
 
@@ -283,7 +282,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				testingState.Visible = false
 			end
 
-			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
+			local endTime = math.floor(total() * 10 ^ 2 + 0.5) / 10 ^ 2
 			local executor, executorVers = identifyexecutor()
 			local tested = numStandards - excludedCount
 			local rate = tested > 0 and math.round(passed / tested * 100) or 0

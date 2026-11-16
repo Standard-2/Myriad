@@ -1,6 +1,7 @@
 --// Requires
 local Signal = require("@packages/signal")
 local framework = require("@standards/framework")
+local stopwatch = require("@modules/stopwatch")
 
 --// Variables
 local self = {
@@ -48,8 +49,8 @@ function self.Run(options: StandardTestOptions?)
             end)
 
             if options.timeout then
-                local start = os.clock()
-                while not isFinished and os.clock() - start < options.timeout do
+                local elapsedOf = stopwatch.start()
+                while not isFinished and elapsedOf() < options.timeout do
                     task.wait()
                 end
 

@@ -2,6 +2,7 @@
 --!nolint
 
 return {
+	global = "decompile",
 	cases = {
 		{
 			id = "decomp target",
@@ -27,25 +28,9 @@ return {
 			end,
 		},
 		{
-			id = "global",
-			run = function(self)
-				if not decompile then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
-		{
 			id = "string",
 			run = function(self)
-				if not self._scriptOk or not decompile then
+				if not self._scriptOk then
 					return {
 						status = 200,
 						message = "Passed",

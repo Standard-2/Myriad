@@ -36,35 +36,12 @@ local function checkProperty(self, prop)
 end
 
 return {
+	global = "getconnections",
+	type = "function",
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				if type(getconnections) ~= "function" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._fn = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
 		{
 			id = "fetch",
 			run = function(self)
-				if not self._fn then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
 				local Event = Instance.new("BindableEvent")
 
 				self._called = false

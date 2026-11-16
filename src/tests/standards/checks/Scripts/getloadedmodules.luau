@@ -2,6 +2,7 @@
 --!nolint
 
 return {
+	global = "getloadedmodules",
 	cases = {
 		{
 			id = "empty module",
@@ -17,22 +18,6 @@ return {
 				end
 
 				self._module = module
-				return {
-					status = 200,
-					message = `Passed`,
-				}
-			end,
-		},
-		{
-			id = "global",
-			run = function(self)
-				if not getloadedmodules then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
 				return {
 					status = 200,
 					message = `Passed`,
@@ -69,7 +54,7 @@ return {
 		{
 			id = "loaded",
 			run = function(self)
-				if self._module == nil or self._required ~= true or not getloadedmodules then
+				if self._module == nil or self._required ~= true then
 					return {
 						status = 200,
 						message = `Passed`,

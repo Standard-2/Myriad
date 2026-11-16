@@ -2,6 +2,7 @@
 --!nolint
 
 return {
+	global = "getscripthash",
 	cases = {
 		{
 			id = "Animate",
@@ -46,25 +47,9 @@ return {
 			end,
 		},
 		{
-			id = "global",
-			run = function(self)
-				if not getscripthash then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				return {
-					status = 200,
-					message = `Passed`,
-				}
-			end,
-		},
-		{
 			id = "animate hash",
 			run = function(self)
-				if not self._animateOk or not getscripthash then
+				if not self._animateOk then
 					return {
 						status = 200,
 						message = `Passed`,
@@ -94,13 +79,6 @@ return {
 		{
 			id = "no bytecode",
 			run = function(self)
-				if not getscripthash then
-					return {
-						status = 200,
-						message = `Passed`,
-					}
-				end
-
 				local noBytecodeScript = Instance.new("LocalScript")
 				local noBytecodeSuccess, noBytecodeReturned = pcall(function()
 					return getscripthash(noBytecodeScript)
@@ -124,7 +102,7 @@ return {
 		{
 			id = "whysodtc hash",
 			run = function(self)
-				if not self._whysodtcOk or not getscripthash then
+				if not self._whysodtcOk then
 					return {
 						status = 200,
 						message = `Passed`,

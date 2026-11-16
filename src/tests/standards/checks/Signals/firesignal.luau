@@ -26,29 +26,12 @@ local function actorFailure(self, prefix, code, message)
 end
 
 return {
+	global = "firesignal",
+	type = "function",
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				if type(firesignal) ~= "function" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._fn = true
-
-				return passed()
-			end,
-		},
 		{
 			id = "fire",
 			run = function(self)
-				if not self._fn then
-					return passed()
-				end
-
 				local NoChildsService = game:GetService("SocialService")
 				local BindableEv = Instance.new("BindableEvent")
 				BindableEv.Name = "MYRIAD_FIRESIGNAL"

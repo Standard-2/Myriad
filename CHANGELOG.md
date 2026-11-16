@@ -2,7 +2,7 @@
 
 # Changelog
 
-## [2.0.2] - `STABLE`
+## [2.1.0] - `STABLE`
 
 ### Added
 
@@ -11,6 +11,11 @@
 ### Fixed
 
 - [Standards] `cloneref` keeps the part in a detached folder so a workspace listener cannot retain the original userdata through the xref check. [#33]
+
+### Changed
+
+- [Standards] All checks have been fully migrated to take advantage of the new `framework`, for example, some checks added globality and dependency checks as a case instead of using the built in framework field.
+- All time-keeping now uses `DateTime.now()` instead of time, which prevents any CPU schedule freezing an executor causes, affecting the total time a check/case takes.
 
 ## [2.0.1] - `STABLE` `HOTFIX`
 
@@ -510,7 +515,7 @@
 
 <!-- References -->
 
-[2.0.2]: https://github.com/Standard-2/Myriad/compare/v2.0.1...v2.0.2
+[2.1.0]: https://github.com/Standard-2/Myriad/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/Standard-2/Myriad/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Standard-2/Myriad/compare/v1.8.2...v2.0.0
 [1.8.2]: https://github.com/Standard-2/Myriad/compare/v1.8.1...v1.8.2

@@ -2,39 +2,14 @@
 --!nolint
 
 return {
+	global = "cansignalreplicate",
+	type = "function",
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				local gameRefs = require("@gameRefs")
-				self._gameRefs = gameRefs
-
-				if type(cansignalreplicate) ~= "function" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._fn = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
 		{
 			id = "boolean",
 			run = function(self)
-				if not self._fn then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
-				local valid = self._gameRefs.Baseplate.Touched
+				local gameRefs = require("@gameRefs")
+				local valid = gameRefs.Baseplate.Touched
 				local isReplicating = cansignalreplicate(valid)
 				self._isReplicating = isReplicating
 				self._called = true

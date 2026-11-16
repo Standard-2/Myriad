@@ -9,6 +9,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 	local console = require("@dependencies/ui/console")
 	local config = require("@config")
 	local keybind = require("@modules/keybind")
+	local stopwatch = require("@modules/stopwatch")
 
 	--// Variables
 	local currentTask = nil
@@ -86,7 +87,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				)
 				:Play()
 
-			local startTime = time()
+			local total = stopwatch.start()
 			local passed = 0
 			local failed = 0
 			local numTests = 0
@@ -122,9 +123,9 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					testingState.NextTest = nextEntry and `[{nextEntry.groupName}] {nextEntry.name}` or "None"
 				end
 
-				local startTestTime = os.clock()
+				local check = stopwatch.start()
 				local success, result
-				
+
 				do
 					local done = false
 					local thread = task.spawn(function()
@@ -132,13 +133,11 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 						done = true
 					end)
 
-					local elapsed = 0
-					while not done and elapsed < testConfig.testTimeout do
+					while not done and check() < testConfig.testTimeout do
 						task.wait(0.061)
-						elapsed = os.clock() - startTestTime
 						if testingState then
-							testingState.TotalElapsed = time() - startTime
-							testingState.CheckElapsed = elapsed
+							testingState.TotalElapsed = total()
+							testingState.CheckElapsed = check()
 						end
 					end
 
@@ -149,7 +148,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					end
 				end
 
-				local checkElapsed = os.clock() - startTestTime
+				local checkElapsed = check()
                 
 				if not success then
 					failed += 1
@@ -166,7 +165,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 				if testingState then
 					testingState.Passed = passed
 					testingState.Failed = failed
-					testingState.TotalElapsed = time() - startTime
+					testingState.TotalElapsed = total()
 					testingState.CheckElapsed = checkElapsed
 				end
 			end
@@ -197,7 +196,7 @@ return function(name: string, tab: types.Tab, titledRow: types.Row, app: types.A
 					:Play()
 			end
 
-			local endTime = math.floor((time() - startTime) * 10 ^ 2 + 0.5) / 10 ^ 2
+			local endTime = math.floor(total() * 10 ^ 2 + 0.5) / 10 ^ 2
 			local executor = "Unknown"
 			if identifyexecutor then
 				executor = identifyexecutor()

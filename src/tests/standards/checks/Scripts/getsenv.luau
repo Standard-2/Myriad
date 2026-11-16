@@ -2,6 +2,7 @@
 --!nolint
 
 return {
+	global = "getsenv",
 	cases = {
 		{
 			id = "Animate",
@@ -18,22 +19,6 @@ return {
 
 				self._animateOk = true
 				self._animate = Animate
-				return {
-					status = 200,
-					message = `Passed`,
-				}
-			end,
-		},
-		{
-			id = "global",
-			run = function(self)
-				if not getsenv then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
 				return {
 					status = 200,
 					message = `Passed`,
@@ -79,7 +64,7 @@ return {
 		{
 			id = "not running",
 			run = function(self)
-				if self._disabled == nil or not getsenv then
+				if self._disabled == nil then
 					return {
 						status = 200,
 						message = `Passed`,
@@ -103,7 +88,7 @@ return {
 		{
 			id = "custom env",
 			run = function(self)
-				if self._customScript == nil or not getsenv then
+				if self._customScript == nil then
 					return {
 						status = 200,
 						message = `Passed`,
@@ -181,7 +166,7 @@ return {
 		{
 			id = "on swimming",
 			run = function(self)
-				if not self._animateOk or not getsenv then
+				if not self._animateOk then
 					return {
 						status = 200,
 						message = `Passed`,

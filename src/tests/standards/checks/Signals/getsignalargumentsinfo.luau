@@ -2,35 +2,12 @@
 --!nolint
 
 return {
+	global = "getsignalargumentsinfo",
+	type = "function",
 	cases = {
-		{
-			id = "global",
-			run = function(self)
-				if type(getsignalargumentsinfo) ~= "function" then
-					return {
-						status = 400,
-						message = "Global not found",
-					}
-				end
-
-				self._fn = true
-
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end,
-		},
 		{
 			id = "call",
 			run = function(self)
-				if not self._fn then
-					return {
-						status = 200,
-						message = "Passed",
-					}
-				end
-
 				local Event = Instance.new("Part").Touched
 				local s, info = pcall(function()
 					return getsignalargumentsinfo(Event)

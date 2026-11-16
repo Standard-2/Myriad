@@ -157,26 +157,7 @@ local drawings = {
 	},
 }
 
-local cases = {
-	{
-		id = "api",
-		run = function(self)
-			if not Drawing or not Drawing.new then
-				return {
-					status = 400,
-					message = "Global Drawing API not found",
-				}
-			end
-
-			self._api = true
-
-			return {
-				status = 200,
-				message = "Passed",
-			}
-		end,
-	},
-}
+local cases = {}
 
 for _, drawing in ipairs(drawings) do
 	local field = drawing.field
@@ -187,13 +168,6 @@ for _, drawing in ipairs(drawings) do
 	table.insert(cases, {
 		id = caseId,
 		run = function(self)
-			if not self._api then
-				return {
-					status = 200,
-					message = "Passed",
-				}
-			end
-
 			local object = Drawing.new(className)
 			if not object then
 				return {
@@ -246,13 +220,6 @@ end
 table.insert(cases, {
 	id = "screen-gui",
 	run = function(self)
-		if not self._api then
-			return {
-				status = 200,
-				message = "Passed",
-			}
-		end
-
 		-- Lua drawing lib
 		local x1, y1, z1 = math.random(1, 255), math.random(1, 255), math.random(1, 255)
 		local parent = gethui and gethui() or game:GetService("CoreGui")
@@ -285,5 +252,9 @@ table.insert(cases, {
 })
 
 return {
+	global = {
+		{ name = "Drawing", message = "Global Drawing API not found" },
+		{ name = "Drawing.new", message = "Global Drawing API not found" },
+	},
 	cases = cases,
 }

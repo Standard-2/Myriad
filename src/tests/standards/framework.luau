@@ -1,5 +1,8 @@
 --!nocheck
 
+--// Imports
+local stopwatch = require("@modules/stopwatch")
+
 local framework = {}
 
 local cache = {}
@@ -34,9 +37,61 @@ local function readGlobal(name)
 	return index
 end
 
-local function globalPresent(name)
+local function globalOk(name, expected)
+	if type(name) ~= "string" or name == "" then
+		return false
+	end
+
 	local value = readGlobal(name)
+	if type(expected) == "string" and expected ~= "" then
+		return type(value) == expected
+	end
 	return value ~= nil and value ~= false
+end
+
+local function globalPresent(name)
+	return globalOk(name, nil)
+end
+
+local function describeGlobal(entry, fallbackType)
+	local name = entry
+	local expected = nil
+	local message = nil
+	if type(entry) == "table" then
+		name = entry.name
+		if type(entry.type) == "string" and entry.type ~= "" then
+			expected = entry.type
+		end
+		if type(entry.message) == "string" then
+			message = entry.message
+		end
+	end
+	if expected == nil and type(fallbackType) == "string" and fallbackType ~= "" then
+		expected = fallbackType
+	end
+	return name, expected, message
+end
+
+local function rejectGlobals(globals, fallbackType, status, defaultMessage)
+	if type(globals) == "string" then
+		globals = { globals }
+	elseif type(globals) == "table" and type(globals.name) == "string" and globals[1] == nil then
+		globals = { globals }
+	elseif type(globals) ~= "table" then
+		return nil
+	end
+
+	for _, entry in ipairs(globals) do
+		local name, expected, message = describeGlobal(entry, fallbackType)
+		local label = if type(name) == "string" and name ~= "" then name else "nil"
+		if not globalOk(name, expected) then
+			return {
+				status = status,
+				message = message or defaultMessage(label),
+			}
+		end
+	end
+	return nil
 end
 
 function framework.aliases(aliases)
@@ -120,19 +175,11 @@ local function normalizeCall(ok, value)
 end
 
 local function runSpec(spec)
-	local globals = spec.global
-	if type(globals) == "string" then
-		globals = { globals }
-	end
-	if type(globals) == "table" then
-		for _, name in ipairs(globals) do
-			if not globalPresent(name) then
-				return {
-					status = 400,
-					message = "Global not found",
-				}
-			end
-		end
+	local missingGlobal = rejectGlobals(spec.global, spec.type, 400, function()
+		return "Global not found"
+	end)
+	if missingGlobal then
+		return missingGlobal
 	end
 
 	local dependencies = spec.dependencies
@@ -178,25 +225,11 @@ local function runSpec(spec)
 			end
 		end
 
-		local globalDeps = dependencies.globals
-		if type(globalDeps) == "table" then
-			for _, entry in ipairs(globalDeps) do
-				local name = entry
-				local custom = nil
-				if type(entry) == "table" then
-					name = entry.name
-					if type(entry.message) == "string" then
-						custom = entry.message
-					end
-				end
-				local label = if type(name) == "string" and name ~= "" then name else "nil"
-				if type(name) ~= "string" or name == "" or not globalPresent(name) then
-					return {
-						status = 401,
-						message = custom or `Dependant global '{label}' not found`,
-					}
-				end
-			end
+		local missingDep = rejectGlobals(dependencies.globals, nil, 401, function(label)
+			return `Dependant global '{label}' not found`
+		end)
+		if missingDep then
+			return missingDep
 		end
 	end
 
@@ -215,14 +248,14 @@ local function runSpec(spec)
 				id = case.id
 			end
 
-			local started = os.clock()
+			local elapsedOf = stopwatch.start()
 			local ok, value
 			if type(case) == "table" and type(case.run) == "function" then
 				ok, value = pcall(case.run, spec)
 			else
 				ok, value = false, "Case returned no result"
 			end
-			local elapsed = os.clock() - started
+			local elapsed = elapsedOf()
 
 			local row
 			if not ok then
@@ -331,7 +364,7 @@ function framework.run(test, id)
 		stack[id] = true
 	end
 
-	local started = os.clock()
+	local elapsedOf = stopwatch.start()
 	local result
 	if type(test) == "function" then
 		result = normalizeCall(pcall(test))
@@ -343,7 +376,7 @@ function framework.run(test, id)
 			message = "Case returned no result",
 		}
 	end
-	result.elapsed = os.clock() - started
+	result.elapsed = elapsedOf()
 
 	if id then
 		stack[id] = nil
