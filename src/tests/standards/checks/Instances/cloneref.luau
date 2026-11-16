@@ -1,5 +1,20 @@
 --!nocheck
 --!nolint
+
+local function cleanup(self)
+	local container = self._container
+	self._container = nil
+	self._part = nil
+	self._newRef = nil
+	self._detector = nil
+	self._canary = nil
+	self._marker = nil
+	self._collected = nil
+	if container then
+		container:Destroy()
+	end
+end
+
 return {
 	global = "cloneref",
 	dependencies = {
@@ -14,13 +29,15 @@ return {
 		{
 			id = "service identity",
 			run = function(self)
+				local container = Instance.new("Folder")
 				local originalPart = Instance.new("Part")
+				originalPart.Parent = container
+				self._container = container
 				self._part = originalPart
 				local originalService = game:GetService("CoreGui")
 
 				if cloneref(originalService) == originalService then
-					originalPart:Destroy()
-					self._part = nil
+					cleanup(self)
 					return {
 						status = 500,
 						message = "Cloned service cannot be equal to original reference",
@@ -37,9 +54,6 @@ return {
 				if not originalPart then
 					return { status = 200, message = `Passed` }
 				end
-
-				-- We do this so that getnilinstances doesn't find it.
-				originalPart.Parent = workspace
 
 				local marker = "Myriad" .. tostring(math.random(100000, 999999))
 				originalPart.Name = marker
@@ -63,12 +77,7 @@ return {
 				self._detector = collectGarbageDetecor
 
 				if originalPart == originalPartNewRef then
-					pcall(function()
-						originalPart:Destroy()
-					end)
-					self._part = nil
-					self._newRef = nil
-					self._detector = nil
+					cleanup(self)
 					return {
 						status = 500,
 						message = "Cloned part cannot be equal to original reference",
@@ -104,12 +113,7 @@ return {
 				local spoofed = canary ~= nil and (seen == canary or thirdSeen == canary)
 
 				if not writeOk or not readOk or not thirdOk or spoofed or seen ~= renamed or thirdSeen ~= renamed then
-					pcall(function()
-						originalPart:Destroy()
-					end)
-					self._part = nil
-					self._newRef = nil
-					self._detector = nil
+					cleanup(self)
 					return {
 						status = 500,
 						message = "The new xref does not contain the same metadata as the original",
@@ -127,10 +131,6 @@ return {
 				if not originalPart or not collectGarbageDetecor then
 					return { status = 200, message = `Passed` }
 				end
-
-				pcall(function()
-					originalPart:Destroy()
-				end)
 
 				originalPart = nil
 				self._part = nil
@@ -156,6 +156,7 @@ return {
 					task.cancel(cancelThread)
 					self._collected = true
 				else
+					cleanup(self)
 					return {
 						status = 500,
 						message = "The garbage collector is not working properly. It should have cleaned up in 2 seconds, but it took more",
@@ -170,10 +171,13 @@ return {
 			run = function(self)
 				local collectGarbageDetecor = self._detector
 				if not collectGarbageDetecor or not self._collected then
+					cleanup(self)
 					return { status = 200, message = `Passed` }
 				end
 
-				if collectGarbageDetecor[2] then
+				local originalRetained = collectGarbageDetecor[2] ~= nil
+				cleanup(self)
+				if originalRetained then
 					return {
 						status = 500,
 						message = "Cloned part still holds the original xref",
