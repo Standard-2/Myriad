@@ -20,6 +20,10 @@
 
 After the discontinuation of [UNC][unc], multiple forks and continuations emerged, alongside separate executor tests focused on areas such as vulnerabilities and identity checks. Myriad aims to unify these efforts into a single, comprehensive test suite.
 
+<a href="https://myriad.tools/release-notes/latest">
+  <img alt="Myriad latest release" src="https://myriad.tools/release-card.svg" />
+</a>
+
 </div>
 
 ## Table of Contents
