@@ -8,6 +8,10 @@
 
 ### Added
 
+- [Standards] `setthreadidentity` missing cases.
+
+### Added
+
 ## [2.1.0] - `STABLE`
 
 ### Added

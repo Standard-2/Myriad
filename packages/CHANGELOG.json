@@ -3,6 +3,11 @@
   "description": "<!-- markdownlint-disable MD024 -->",
   "releases": [
     {
+      "version": "UNRELEASED",
+      "tags": [],
+      "changes": {}
+    },
+    {
       "version": "2.1.0",
       "tags": [
         "STABLE"
