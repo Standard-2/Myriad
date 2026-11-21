@@ -5,7 +5,13 @@
     {
       "version": "UNRELEASED",
       "tags": [],
-      "changes": {}
+      "changes": {
+        "added": [
+          "Added inline codeblock support to the changelog renderer. [kacParser]",
+          "[Standards] `setthreadidentity` check now has functionality tests.",
+          "[Standards] `setconstant` check now has functionality tests."
+        ]
+      }
     },
     {
       "version": "2.1.0",

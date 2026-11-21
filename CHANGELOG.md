@@ -8,7 +8,10 @@
 
 ### Added
 
-- [Standards] `setthreadidentity` missing cases.
+- Added inline codeblock support to the changelog renderer. [kacParser]
+- [Standards] `setthreadidentity` check now has functionality tests.
+- [Standards] `setconstant` check now has functionality tests.
+- [Standards] `setupvalue` check now has functionality tests.
 
 ### Added
 
