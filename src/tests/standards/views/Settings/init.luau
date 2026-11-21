@@ -3,6 +3,7 @@
 return function(name, tab, titledRow, app, testConfig)
 	local cascade = require("@packages/cascade")
 	local config = require("@config")
+	local framework = require("@standards/framework")
 	local writefileTest = require("@checks/Filesystem/writefile")
 
 	local pageSection = tab:PageSection({ Title = "Settings", Subtitle = "Configure the standards test" })
@@ -84,8 +85,16 @@ return function(name, tab, titledRow, app, testConfig)
 					end
 
 					if value then
-						local success, result = pcall(writefileTest)
-						if not success or result.status ~= 200 then
+						local result = framework.peek("Filesystem.writefile")
+						if not result then
+							local success
+							success, result = pcall(framework.run, writefileTest, "Filesystem.writefile")
+							if not success then
+								result = nil
+							end
+						end
+
+						if type(result) ~= "table" or result.status ~= 200 then
 							app:Notification({
 								App = "MYRIAD",
 								Title = "Standards test",

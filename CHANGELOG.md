@@ -12,6 +12,12 @@
 - [Standards] `setthreadidentity` check now has functionality tests.
 - [Standards] `setconstant` check now has functionality tests.
 - [Standards] `setupvalue` check now has functionality tests.
+- [Standards] `setstack` check now has functionality tests.
+- [Standards] `getstack` check now has functionality tests.
+
+### Fixed
+
+- Fixed an issue where a notification would always appear saying "`writefile` test did not pass. Logging may not occur.", this was due to it expecting the old framework.
 
 ### Added
 

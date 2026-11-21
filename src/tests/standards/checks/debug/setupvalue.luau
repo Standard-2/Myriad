@@ -2,15 +2,34 @@
 --!nolint
 
 --// Private Methods
-local function sample()
-	local upvalue = 90
+local function capture()
+	local hue = "amber"
+	local mark = "slate"
 
-	local function originalFunction()
-		upvalue += 1
-		return upvalue
+	local function step()
+		hue ..= "-live"
+		mark ..= "-live"
+		return hue, mark
 	end
 
-	return originalFunction
+	return step
+end
+
+local function upvalueIndex(fn, expected)
+	local index = 1
+
+	while true do
+		local ok, value = pcall(debug.getupvalue, fn, index)
+		if not ok then
+			return nil
+		end
+
+		if value == expected then
+			return index
+		end
+
+		index += 1
+	end
 end
 
 local function boundsIndex(fn)
@@ -40,14 +59,29 @@ return {
 		{
 			id = "read",
 			run = function(self)
-				local originalFunction = sample()
+				local step = capture()
+				local index = upvalueIndex(step, "amber")
+				if index == nil then
+					return {
+						status = 500,
+						message = "Expected upvalue was not found: amber",
+					}
+				end
 
-				debug.setupvalue(originalFunction, 1, 99)
-				local current = debug.getupvalue(originalFunction, 1)
-				if current ~= 99 then
+				debug.setupvalue(step, index, "copper")
+				local current = debug.getupvalue(step, index)
+				if current ~= "copper" then
 					return {
 						status = 500,
 						message = `Upvalue was {current} after debug.setupvalue`,
+					}
+				end
+
+				local sibling = upvalueIndex(step, "slate")
+				if sibling == nil then
+					return {
+						status = 500,
+						message = "Expected upvalue was not found: slate",
 					}
 				end
 
@@ -60,21 +94,29 @@ return {
 		{
 			id = "call",
 			run = function(self)
-				local originalFunction = sample()
-				local first = originalFunction()
-				if first ~= 91 then
+				local step = capture()
+				local firstHue, firstMark = step()
+				if firstHue ~= "amber-live" or firstMark ~= "slate-live" then
 					return {
 						status = 500,
-						message = `Function returned {first} before debug.setupvalue`,
+						message = `Function returned {firstHue}, {firstMark} before debug.setupvalue`,
 					}
 				end
 
-				debug.setupvalue(originalFunction, 1, 99)
-				local second = originalFunction()
-				if second ~= 100 then
+				local index = upvalueIndex(step, "amber-live")
+				if index == nil then
 					return {
 						status = 500,
-						message = `Function returned {second} after debug.setupvalue`,
+						message = "Expected upvalue was not found: amber-live",
+					}
+				end
+
+				debug.setupvalue(step, index, "copper")
+				local secondHue, secondMark = step()
+				if secondHue ~= "copper-live" or secondMark ~= "slate-live-live" then
+					return {
+						status = 500,
+						message = `Function returned {secondHue}, {secondMark} after debug.setupvalue`,
 					}
 				end
 
@@ -87,9 +129,9 @@ return {
 		{
 			id = "bounds",
 			run = function(self)
-				local originalFunction = sample()
-				local invalidIndex = boundsIndex(originalFunction)
-				if pcall(debug.setupvalue, originalFunction, invalidIndex, 0) then
+				local step = capture()
+				local invalidIndex = boundsIndex(step)
+				if pcall(debug.setupvalue, step, invalidIndex, "overflow") then
 					return {
 						status = 500,
 						message = "Should error when setting Out-of-bounds indexes.",
@@ -105,8 +147,8 @@ return {
 		{
 			id = "invalid-index",
 			run = function(self)
-				local originalFunction = sample()
-				if pcall(debug.setupvalue, originalFunction, 0, 0) then
+				local step = capture()
+				if pcall(debug.setupvalue, step, 0, "nope") then
 					return {
 						status = 500,
 						message = "Should error when setting invalid upvalue indexes",
@@ -122,7 +164,7 @@ return {
 		{
 			id = "cclosure",
 			run = function(self)
-				if pcall(debug.setupvalue, print, 1, 0) then
+				if pcall(debug.setupvalue, print, 1, "nope") then
 					return {
 						status = 500,
 						message = "Should error with C closures",
