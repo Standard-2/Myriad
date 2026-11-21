@@ -2,6 +2,12 @@
 
 # Changelog
 
+## [UNRELEASED]
+
+> Target: [2.2.0]
+
+### Added
+
 ## [2.1.0] - `STABLE`
 
 ### Added
