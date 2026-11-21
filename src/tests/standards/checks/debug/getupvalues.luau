@@ -13,7 +13,7 @@ return {
 	},
 	cases = {
 		{
-			id = "opt0-compile",
+			id = "[o0] compile",
 			run = function(self)
 				local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 =
 					time(), "Myriad", newproxy(), {}, game, newproxy(), Enum, warn, print, workspace
@@ -65,7 +65,7 @@ return {
 			end,
 		},
 		{
-			id = "opt0-table",
+			id = "[o0] table",
 			run = function(self)
 				if type(self._opt0) ~= "function" then
 					return { status = 200, message = "Passed" }
@@ -87,7 +87,7 @@ return {
 			end,
 		},
 		{
-			id = "opt0-expected",
+			id = "[o0] expected",
 			run = function(self)
 				if type(self._opt0Upvalues) ~= "table" or type(self._opt0Order) ~= "table" then
 					return { status = 200, message = "Passed" }
@@ -120,7 +120,7 @@ return {
 			end,
 		},
 		{
-			id = "opt0-unexpected",
+			id = "[o0] unexpected",
 			run = function(self)
 				if type(self._opt0Upvalues) ~= "table" or type(self._opt0Order) ~= "table" then
 					return { status = 200, message = "Passed" }
@@ -153,7 +153,7 @@ return {
 			end,
 		},
 		{
-			id = "opt0-count",
+			id = "[o0] count",
 			run = function(self)
 				if type(self._opt0Upvalues) ~= "table" or type(self._opt0Order) ~= "table" then
 					return { status = 200, message = "Passed" }
@@ -175,7 +175,7 @@ return {
 			end,
 		},
 		{
-			id = "opt1-compile",
+			id = "[o1] compile",
 			run = function(self)
 				local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 =
 					time(), "Myriad", newproxy(), {}, game, newproxy(), Enum, warn, print, workspace
@@ -227,7 +227,7 @@ return {
 			end,
 		},
 		{
-			id = "opt1-table",
+			id = "[o1] table",
 			run = function(self)
 				if type(self._opt1) ~= "function" then
 					return { status = 200, message = "Passed" }
@@ -249,7 +249,7 @@ return {
 			end,
 		},
 		{
-			id = "opt1-expected",
+			id = "[o1] expected",
 			run = function(self)
 				if type(self._opt1Upvalues) ~= "table" or type(self._opt1Order) ~= "table" then
 					return { status = 200, message = "Passed" }
@@ -282,7 +282,7 @@ return {
 			end,
 		},
 		{
-			id = "opt1-unexpected",
+			id = "[o1] unexpected",
 			run = function(self)
 				if type(self._opt1Upvalues) ~= "table" or type(self._opt1Order) ~= "table" then
 					return { status = 200, message = "Passed" }
@@ -315,7 +315,7 @@ return {
 			end,
 		},
 		{
-			id = "opt1-count",
+			id = "[o1] count",
 			run = function(self)
 				if type(self._opt1Upvalues) ~= "table" or type(self._opt1Order) ~= "table" then
 					return { status = 200, message = "Passed" }
