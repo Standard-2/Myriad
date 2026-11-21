@@ -181,6 +181,57 @@ return function(self, properties: any)
 		}),
 	}) :: Frame
 
+	local function escapeRich(text: string): string
+		text = string.gsub(text, "&", "&amp;")
+		text = string.gsub(text, "<", "&lt;")
+		text = string.gsub(text, ">", "&gt;")
+		text = string.gsub(text, '"', "&quot;")
+		text = string.gsub(text, "'", "&apos;")
+		return text
+	end
+
+	local function codeOpen(): string
+		local source = theme.Text.Primary[1]
+		local color = if typeof(source) == "Color3" then source else source.Value
+		local bright = (color.R + color.G + color.B) / 3
+		local textColor = if bright > 0.6 then "#E3A322" else "#8C5A00"
+		return `<font family="rbxasset://fonts/families/RobotoMono.json" color="{textColor}">`
+	end
+
+	local function formatItem(text: string): string
+		local parts = {}
+		local index = 1
+
+		while index <= #text do
+			local startAt = string.find(text, "`", index, true)
+			if not startAt then
+				table.insert(parts, escapeRich(string.sub(text, index)))
+				break
+			end
+
+			local finishAt = string.find(text, "`", startAt + 1, true)
+			if not finishAt then
+				table.insert(parts, escapeRich(string.sub(text, index)))
+				break
+			end
+
+			if startAt > index then
+				table.insert(parts, escapeRich(string.sub(text, index, startAt - 1)))
+			end
+
+			local code = string.sub(text, startAt + 1, finishAt - 1)
+			if code == "" then
+				table.insert(parts, escapeRich("`"))
+				index = startAt + 1
+			else
+				table.insert(parts, `{codeOpen()}{escapeRich(code)}</font>`)
+				index = finishAt + 1
+			end
+		end
+
+		return table.concat(parts)
+	end
+
 	local function buildTagPill(tag: string)
 		local upperTag = tag:upper()
 		local cfg = TAG_CONFIG[upperTag] or TAG_CONFIG["PRE-RELEASE"]
@@ -259,7 +310,8 @@ return function(self, properties: any)
 				AutomaticSize = Enum.AutomaticSize.Y,
 				FontFace = FONT_REG,
 				TextSize = 14,
-				Text = `– {item}`,
+				RichText = true,
+				Text = `– {formatItem(item)}`,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextWrapped = true,
 				LayoutOrder = i + 1,
