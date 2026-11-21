@@ -10,7 +10,6 @@ return {
 		{
 			id = "connect",
 			run = function(self)
-				--// Functionality test
 				local socket = WebSocket.connect("wss://echo.websocket.org/")
 				if not (type(socket) == "table" or type(socket) == "userdata") then
 					return {

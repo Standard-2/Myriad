@@ -7,7 +7,6 @@ return {
 		{
 			id = "touch part",
 			run = function(self)
-				--// Functionality test
 				local touchPart = game.Players.LocalPlayer.Character.Head
 				local originalPart = Instance.new("Part")
 				self._touchPart = touchPart

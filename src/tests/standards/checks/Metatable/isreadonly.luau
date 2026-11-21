@@ -7,7 +7,6 @@ return {
 		{
 			id = "writable",
 			run = function(self)
-				--// Functionality test
 				local originalTable = {}
 
 				if isreadonly(originalTable) then

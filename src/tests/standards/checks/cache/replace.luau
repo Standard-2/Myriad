@@ -7,7 +7,6 @@ return {
 		{
 			id = "distinct",
 			run = function(self)
-				--// Functionality test
 				local inst1 = game:GetService("BadgeService")
 				local inst2 = game:GetService("Stats")
 

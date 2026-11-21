@@ -7,7 +7,6 @@ return {
 		{
 			id = "player",
 			run = function(self)
-				--// Functionality test
 				local originalPart = Instance.new("Part", workspace)
 				local originalClickDetector = Instance.new("ClickDetector", originalPart)
 

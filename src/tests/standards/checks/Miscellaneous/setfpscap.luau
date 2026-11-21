@@ -7,7 +7,6 @@ return {
 		{
 			id = "cap",
 			run = function(self)
-				--// Functionality Test
 				local renderStepped = game:GetService("RunService").RenderStepped
 
 				local function step()

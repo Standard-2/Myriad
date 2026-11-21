@@ -12,7 +12,6 @@ return {
 		{
 			id = "part",
 			run = function(self)
-				--// Functionality test
 				local part = Instance.new("Part")
 				local part2 = Instance.new("Part", game)
 				self._part = part

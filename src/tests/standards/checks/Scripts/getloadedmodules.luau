@@ -34,7 +34,6 @@ return {
 					}
 				end
 
-				--// Functionality test
 				local module = self._module
 				local requireOk, requireResult = pcall(require, module)
 				if not requireOk then

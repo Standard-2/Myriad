@@ -7,7 +7,6 @@ return {
 		{
 			id = "Name",
 			run = function(self)
-				--// Functionality test
 				local part = Instance.new("Part")
 				part.Name = "Part"
 				local sized = Vector3.new(3.25, 7.5, 0.5)

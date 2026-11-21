@@ -7,7 +7,6 @@ return {
 		{
 			id = "hold began",
 			run = function(self)
-				--// Functionality test
 				local fired = false
 				local holdBegan = false
 				local holdEnded = false

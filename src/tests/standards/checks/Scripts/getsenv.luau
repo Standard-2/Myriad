@@ -173,7 +173,6 @@ return {
 					}
 				end
 
-				--// Functionality test
 				local Animate = self._animate
 				local enironment = getsenv(Animate)
 				if type(enironment.onSwimming) ~= "function" then

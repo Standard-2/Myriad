@@ -10,7 +10,6 @@ return {
 		{
 			id = "count",
 			run = function(self)
-				--// Functionality test
 				local function originalFunction()
 					return function()
 						return "MYRI1"

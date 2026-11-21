@@ -10,7 +10,6 @@ return {
 		{
 			id = "table",
 			run = function(self)
-				--// Functionality test
 				local function originalFunction()
 					local _1 = 2
 					local _2 = "A"

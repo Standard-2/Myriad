@@ -11,7 +11,6 @@ return {
 		{
 			id = "number",
 			run = function(self)
-				--// Functionality test
 				if typeof(getthreadidentity()) ~= "number" then
 					return {
 						status = 500,

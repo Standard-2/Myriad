@@ -11,7 +11,6 @@ return {
 		{
 			id = "table",
 			run = function(self)
-				--// Functionality Test
 				local response = request({
 					Url = "https://any.httpbun.com/",
 					Method = "GET",

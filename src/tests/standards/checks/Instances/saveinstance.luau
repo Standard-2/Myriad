@@ -13,7 +13,6 @@ return {
 		{
 			id = "save",
 			run = function()
-				--// Functionality test
 				local guid = game:GetService("HttpService"):GenerateGUID(false):gsub("-", "")
 				local part = Instance.new("Part")
 

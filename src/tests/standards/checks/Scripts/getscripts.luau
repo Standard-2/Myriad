@@ -7,7 +7,6 @@ return {
 		{
 			id = "LocalScript",
 			run = function(self)
-				--// Functionality test
 				local localScript = Instance.new("LocalScript")
 				local moduleScript = Instance.new("ModuleScript")
 				local serverScript = Instance.new("Script")

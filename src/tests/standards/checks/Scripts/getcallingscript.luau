@@ -13,7 +13,6 @@ return {
 		{
 			id = "executor call",
 			run = function(self)
-				--// Functionality test
 				local original
 				original = hookmetamethod(game, "__index", function(self, index)
 					if not checkcaller() then

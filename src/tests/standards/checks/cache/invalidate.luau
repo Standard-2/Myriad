@@ -7,7 +7,6 @@ return {
 		{
 			id = "identity",
 			run = function(self)
-				--// Functionality test
 				local badgeService = game:GetService("BadgeService")
 
 				if badgeService ~= game:GetService("BadgeService") then

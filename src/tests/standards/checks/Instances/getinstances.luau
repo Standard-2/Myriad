@@ -7,7 +7,6 @@ return {
 		{
 			id = "instance",
 			run = function(self)
-				--// Functionality test
 				local originalPart1, found1 = Instance.new("Part"), false
 				local originalPart2, found2 = Instance.new("Part", workspace), false
 

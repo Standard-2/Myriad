@@ -10,7 +10,6 @@ return {
 		{
 			id = "introspect",
 			run = function(self)
-				--// Functionality test
 				local originalFunction = loadstring([[
 		return function()
 			local function MYRIAD(_, _, ...) return "MYRI_1" end

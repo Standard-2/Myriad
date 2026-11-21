@@ -85,7 +85,6 @@ return {
 					}
 				end
 
-				--// Functionality test
 				local function checkPatterns(source, patterns)
 					local missing = {}
 					for _, pattern in ipairs(patterns) do

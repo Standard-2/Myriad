@@ -15,7 +15,6 @@ return {
 		{
 			id = "opt0-compile",
 			run = function(self)
-				--// Functionality test
 				local Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10 =
 					time(), "Myriad", newproxy(), {}, game, newproxy(), Enum, warn, print, workspace
 

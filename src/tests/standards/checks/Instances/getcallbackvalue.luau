@@ -10,7 +10,6 @@ return {
 		{
 			id = "bindable",
 			run = function(self)
-				--// Functionality test
 				local r1, r2, r3 = math.random(1, 10), math.random(1, 10), math.random(1, 10)
 
 				local ReplicatedStorage = game:GetService("ReplicatedStorage")

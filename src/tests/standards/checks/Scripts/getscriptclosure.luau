@@ -12,7 +12,6 @@ return {
 			run = function(self)
 				local cryptReference = require("@dependencies/crypt/crypt.luau")
 
-				--// Functionality test
 				local originalScript = game.Players.LocalPlayer.Character.Character:FindFirstChild("maybeisdtc")
 				local closure = getscriptclosure(originalScript)
 				self._closure = closure

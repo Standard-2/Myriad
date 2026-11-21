@@ -7,7 +7,6 @@ return {
 		{
 			id = "LocalScript",
 			run = function(self)
-				--// Functionality test
 				local animate = game.Players.LocalPlayer.Character:FindFirstChild("Animate")
 				local runningScript = game.Players.LocalPlayer.Character.Character:FindFirstChild("whysoud")
 				local disabledScript = game.Players.LocalPlayer.Character.Character:FindFirstChild("whysodtc")

@@ -13,7 +13,6 @@ return {
 		{
 			id = "actor",
 			run = function(self)
-				--// Functionality test
 				local gameRefs = require("@gameRefs")
 				local actor = gameRefs.PMOVON
 

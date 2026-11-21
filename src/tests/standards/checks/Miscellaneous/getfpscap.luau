@@ -7,7 +7,6 @@ return {
 		{
 			id = "number",
 			run = function(self)
-				--// Functionality Test
 				if typeof(getfpscap()) ~= "number" then
 					return {
 						status = 500,
