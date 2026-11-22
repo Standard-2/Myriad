@@ -45,5 +45,28 @@ return {
 				return { status = 200, message = "Passed" }
 			end,
 		},
+		{
+			id = "roundtrip",
+			run = function(self)
+				if type(lz4compress) ~= "function" then
+					return {
+						status = 401,
+						message = "Dependant global 'lz4compress' not found",
+					}
+				end
+
+				local text = "cedar-mark cedar-mark"
+				local compressed = lz4compress(text)
+				local plain = lz4decompress(compressed, #text)
+				if plain ~= text then
+					return {
+						status = 500,
+						message = "Decompressed data doesn't match the original",
+					}
+				end
+
+				return { status = 200, message = "Passed" }
+			end,
+		},
 	},
 }

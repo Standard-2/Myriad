@@ -60,5 +60,81 @@ return {
 				}
 			end,
 		},
+		{
+			id = "default",
+			run = function(self)
+				local bag = {}
+				local function live() end
+
+				task.wait(0.1)
+
+				local sawFunction = false
+				local sawTable = false
+				for _, value in pairs(getgc()) do
+					if value == live then
+						sawFunction = true
+					elseif value == bag then
+						sawTable = true
+					end
+				end
+
+				if not sawFunction then
+					return {
+						status = 500,
+						message = "Original function not found",
+					}
+				end
+
+				if sawTable then
+					return {
+						status = 500,
+						message = "Table was included when includeTables was omitted",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
+			id = "false",
+			run = function(self)
+				local bag = {}
+				local function live() end
+
+				task.wait(0.1)
+
+				local sawFunction = false
+				local sawTable = false
+				for _, value in pairs(getgc(false)) do
+					if value == live then
+						sawFunction = true
+					elseif value == bag then
+						sawTable = true
+					end
+				end
+
+				if not sawFunction then
+					return {
+						status = 500,
+						message = "Original function not found",
+					}
+				end
+
+				if sawTable then
+					return {
+						status = 500,
+						message = "Table was included when includeTables was false",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
 	},
 }

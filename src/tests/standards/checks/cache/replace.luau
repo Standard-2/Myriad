@@ -68,5 +68,69 @@ return {
 				}
 			end,
 		},
+		{
+			id = "lookup",
+			run = function(self)
+				local holder = Instance.new("Folder")
+				holder.Name = "n" .. string.gsub(tostring({}), "[^%w]", "")
+				local host = Instance.new("Configuration")
+				host.Name = "lane"
+				local guest = Instance.new("StringValue")
+				guest.Name = "cargo"
+				guest.Value = "kelp"
+				holder.Parent = game:GetService("ReplicatedStorage")
+				host.Parent = holder
+				guest.Parent = holder
+
+				local function finish(result)
+					holder:Destroy()
+					return result
+				end
+
+				local indexedHost = holder.lane
+				local indexedGuest = holder.cargo
+				if indexedHost == nil or indexedGuest == nil then
+					return finish({
+						status = 500,
+						message = "Name lookup did not return an instance",
+					})
+				end
+
+				task.wait()
+				local replaced, replaceErr = pcall(cache.replace, host, guest)
+				if not replaced then
+					return finish({
+						status = 0,
+						message = tostring(replaceErr),
+					})
+				end
+
+				if holder.lane ~= guest then
+					return finish({
+						status = 500,
+						message = "Name lookup did not return the replacement",
+					})
+				end
+
+				if holder.lane.Value ~= "kelp" then
+					return finish({
+						status = 500,
+						message = "Property read did not follow the replacement",
+					})
+				end
+
+				if host == guest then
+					return finish({
+						status = 500,
+						message = "Original reference was replaced",
+					})
+				end
+
+				return finish({
+					status = 200,
+					message = `Passed`,
+				})
+			end,
+		},
 	},
 }

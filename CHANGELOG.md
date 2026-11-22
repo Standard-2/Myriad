@@ -9,11 +9,27 @@
 ### Added
 
 - Added inline codeblock support to the changelog renderer. [kacParser]
+
+- [Standards] `debug.getinfo` check added.
+
 - [Standards] `setthreadidentity` check now has functionality tests.
 - [Standards] `setconstant` check now has functionality tests.
 - [Standards] `setupvalue` check now has functionality tests.
 - [Standards] `setstack` check now has functionality tests.
 - [Standards] `getstack` check now has functionality tests.
+
+- [Standards] `filtergc` check now has cases for name, hash, return shape, executor ignore, and single-field filters.
+- [Standards] `getgc` check now has cases for the default and `false` scans.
+- [Standards] `getrenderproperty` and `setrenderproperty` now have cases for `Color`, `From`, and `Text`.
+- [Standards] `lz4decompress` check now has a roundtrip case.
+- [Standards] `getconnections` check now has cases for `Enabled`, `LuaConnection`, `ForeignState`, `Function`, and `Thread` on a Luau connection.
+- [Standards] `getrenv` check now has a case for a write showing up on the caller.
+- [Standards] `getproto` check now has a case for an inactive proto.
+- [Standards] `getgenv` check now has cases for a shared write and the function environment.
+- [Standards] `cache.replace` check now has a case for name lookup after a replacement.
+- [Standards] `base64encode` check now has a case for a string containing a null byte.
+- [Standards] `getcallbackvalue` check now has a case for callback identity.
+- [Standards] `restorefunction` check now has cases for closure pairs, layered hooks, and an unhooked function.
 
 ### Fixed
 

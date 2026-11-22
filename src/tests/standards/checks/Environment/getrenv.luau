@@ -95,5 +95,42 @@ return {
 				}
 			end,
 		},
+		{
+			id = "write",
+			run = function(self)
+				local previous = warn
+				local ok, err = pcall(function()
+					getrenv().warn = "cedar-mark"
+				end)
+				local seen = warn
+				getrenv().warn = previous
+
+				if not ok then
+					return {
+						status = 0,
+						message = tostring(err),
+					}
+				end
+
+				if seen ~= "cedar-mark" then
+					return {
+						status = 500,
+						message = "Assigning getrenv().warn did not change warn",
+					}
+				end
+
+				if warn ~= previous then
+					return {
+						status = 500,
+						message = "warn was not restored",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
 	},
 }

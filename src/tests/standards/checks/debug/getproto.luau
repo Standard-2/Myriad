@@ -65,6 +65,35 @@ return {
 			end,
 		},
 		{
+			id = "inactive",
+			run = function(self)
+				if type(self._fn) ~= "function" then
+					return { status = 200, message = "Passed" }
+				end
+
+				local inactive = debug.getproto(self._fn, 1)
+				if type(inactive) ~= "function" then
+					return {
+						status = 500,
+						message = "Inactive proto was not a function",
+					}
+				end
+
+				local ok, value = pcall(inactive)
+				if ok and value == "MYRI_1" then
+					return {
+						status = 500,
+						message = "Inactive proto ran the nested function",
+					}
+				end
+
+				return {
+					status = 200,
+					message = `Passed`,
+				}
+			end,
+		},
+		{
 			id = "first-proto",
 			run = function(self)
 				if type(self._fn) ~= "function" then

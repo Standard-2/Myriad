@@ -111,5 +111,42 @@ return {
 				}
 			end,
 		},
+		{
+			id = "binary",
+			run = function(self)
+				local referenceCrypt = self._referenceCrypt
+				if referenceCrypt == nil then
+					referenceCrypt = require("@dependencies/crypt/crypt.luau")
+				end
+
+				local text = "spruce\0kelp\7" .. string.rep("m", 80)
+				local encoded = crypt.base64encode(text)
+				if typeof(encoded) ~= "string" then
+					return {
+						status = 500,
+						message = "Did not return the expected type",
+					}
+				end
+
+				if string.find(encoded, "\n", 1, true) then
+					return {
+						status = 500,
+						message = "Encoded data contains a line break",
+					}
+				end
+
+				if encoded ~= referenceCrypt.base64encode(text) then
+					return {
+						status = 500,
+						message = "Null byte encoding doesn't match reference data",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
 	},
 }

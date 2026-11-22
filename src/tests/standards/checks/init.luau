@@ -35,6 +35,7 @@ return {
 		["debug.getconstants"] = require("@checks/debug/getconstants.luau"),
 		["debug.getproto"] = require("@checks/debug/getproto.luau"),
 		["debug.getprotos"] = require("@checks/debug/getprotos.luau"),
+		["debug.getinfo"] = require("@checks/debug/getinfo.luau"),
 		["debug.getupvalue"] = require("@checks/debug/getupvalue.luau"),
 		["debug.getupvalues"] = require("@checks/debug/getupvalues.luau"),
 		["debug.getstack"] = require("@checks/debug/getstack.luau"),

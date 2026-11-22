@@ -45,9 +45,12 @@ return {
 				local Event = Instance.new("BindableEvent")
 
 				self._called = false
-				local conn = Event.Event:Connect(function()
+				local function handler()
 					self._called = true
-				end)
+				end
+
+				self._handler = handler
+				local conn = Event.Event:Connect(handler)
 
 				self._event = Event
 				self._conn = conn
@@ -182,6 +185,126 @@ return {
 			id = "prop-enable",
 			run = function(self)
 				return checkProperty(self, "Enable")
+			end,
+		},
+		{
+			id = "starts-enabled",
+			run = function(self)
+				if not self._conn or not self._connObj then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
+
+				if self._connObj.Enabled ~= true then
+					cleanup(self)
+					return {
+						status = 500,
+						message = "Enabled was not true for a new connection",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "lua",
+			run = function(self)
+				if not self._conn or not self._connObj then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
+
+				if self._connObj.LuaConnection ~= true then
+					cleanup(self)
+					return {
+						status = 500,
+						message = "LuaConnection was not true for a Luau connection",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "foreign",
+			run = function(self)
+				if not self._conn or not self._connObj then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
+
+				if self._connObj.ForeignState ~= false then
+					cleanup(self)
+					return {
+						status = 500,
+						message = "ForeignState was true for a connection created here",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "function",
+			run = function(self)
+				if not self._conn or not self._connObj or not self._handler then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
+
+				if self._connObj.Function ~= self._handler then
+					cleanup(self)
+					return {
+						status = 500,
+						message = "Function was not the connected callback",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
+			end,
+		},
+		{
+			id = "thread",
+			run = function(self)
+				if not self._conn or not self._connObj then
+					return {
+						status = 200,
+						message = "Passed",
+					}
+				end
+
+				if type(self._connObj.Thread) ~= "thread" then
+					cleanup(self)
+					return {
+						status = 500,
+						message = "Thread was not a thread",
+					}
+				end
+
+				return {
+					status = 200,
+					message = "Passed",
+				}
 			end,
 		},
 		-- ConnectionProxy

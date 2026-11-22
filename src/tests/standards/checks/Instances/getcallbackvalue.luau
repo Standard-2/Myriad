@@ -20,9 +20,11 @@ return {
 				local originalBindable1 = Instance.new("BindableFunction")
 				local originalBindable2 = Instance.new("BindableFunction")
 
-				originalBindable1.OnInvoke = function(a, b)
+				local function onInvoke(a, b)
 					return (a + b) ^ r3
 				end
+				originalBindable1.OnInvoke = onInvoke
+				self._onInvoke = onInvoke
 				originalRemote.OnServerInvoke = function()
 					return r3
 				end
@@ -98,6 +100,24 @@ return {
 					return {
 						status = 500,
 						message = "Bindable's callback value didn't return the expected value",
+					}
+				end
+
+				return { status = 200, message = `Passed` }
+			end,
+		},
+		{
+			id = "bindable identity",
+			run = function(self)
+				local bindableCb1 = self._bindableCb1
+				if not self._ready or not bindableCb1 then
+					return { status = 200, message = `Passed` }
+				end
+
+				if bindableCb1 ~= self._onInvoke then
+					return {
+						status = 500,
+						message = "Bindable's callback value is not the assigned function",
 					}
 				end
 
