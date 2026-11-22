@@ -2,9 +2,7 @@
 
 # Changelog
 
-## [UNRELEASED]
-
-> Target: [2.2.0]
+## [2.2.0] - `STABLE`
 
 ### Added
 
@@ -34,8 +32,6 @@
 ### Fixed
 
 - Fixed an issue where a notification would always appear saying "`writefile` test did not pass. Logging may not occur.", this was due to it expecting the old framework.
-
-### Added
 
 ## [2.1.0] - `STABLE`
 
@@ -550,6 +546,7 @@
 
 <!-- References -->
 
+[2.2.0]: https://github.com/Standard-2/Myriad/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/Standard-2/Myriad/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/Standard-2/Myriad/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Standard-2/Myriad/compare/v1.8.2...v2.0.0
