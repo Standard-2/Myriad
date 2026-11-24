@@ -2,6 +2,12 @@
 
 # Changelog
 
+## [2.2.1] - `HOTFIX`
+
+### Fixed
+
+- [Standards] `filtergc` name cases compile the function with `loadstring` so the function name is preserved.
+
 ## [2.2.0] - `STABLE`
 
 ### Added
@@ -546,6 +552,7 @@
 
 <!-- References -->
 
+[2.2.1]: https://github.com/Standard-2/Myriad/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/Standard-2/Myriad/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/Standard-2/Myriad/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/Standard-2/Myriad/compare/v2.0.0...v2.0.1

@@ -15,8 +15,51 @@ local function listed(result, expected)
 	return false
 end
 
+local function compileNamed(name)
+	local compiledOk, compiled = pcall(
+		loadstring,
+		table.concat({
+			"local function ",
+			name,
+			"()",
+			"return 'brine'",
+			"end",
+			"return ",
+			name,
+		}, "\n")
+	)
+	if not compiledOk or type(compiled) ~= "function" then
+		return nil, {
+			status = 0,
+			message = tostring(compiled),
+		}
+	end
+
+	local ranOk, fn = pcall(compiled)
+	if not ranOk or type(fn) ~= "function" then
+		return nil, {
+			status = 0,
+			message = tostring(fn),
+		}
+	end
+
+	if debug.info(fn, "n") ~= name then
+		return nil, {
+			status = 500,
+			message = "Compiled function did not keep its name",
+		}
+	end
+
+	return fn
+end
+
 return {
 	global = "filtergc",
+	dependencies = {
+		globals = {
+			"loadstring"
+		},
+	},
 	cases = {
 		{
 			id = "function",
@@ -94,14 +137,16 @@ return {
 		{
 			id = "list",
 			run = function(self)
-				local function brineList()
-					return "brine"
+				local name = "brineList"
+				local brineList, failure = compileNamed(name)
+				if not brineList then
+					return failure
 				end
 
 				task.wait(0.1)
 
 				local result = filtergc("function", {
-					Name = "brineList",
+					Name = name,
 					IgnoreExecutor = false,
 				})
 
@@ -121,14 +166,16 @@ return {
 		{
 			id = "one",
 			run = function(self)
-				local function brineOne()
-					return "brine"
+				local name = "brineOne"
+				local brineOne, failure = compileNamed(name)
+				if not brineOne then
+					return failure
 				end
 
 				task.wait(0.1)
 
 				local result = filtergc("function", {
-					Name = "brineOne",
+					Name = name,
 					IgnoreExecutor = false,
 				}, true)
 
@@ -148,14 +195,16 @@ return {
 		{
 			id = "ignored",
 			run = function(self)
-				local function brineHide()
-					return "brine"
+				local name = "brineHide"
+				local brineHide, failure = compileNamed(name)
+				if not brineHide then
+					return failure
 				end
 
 				task.wait(0.1)
 
 				local result = filtergc("function", {
-					Name = "brineHide",
+					Name = name,
 				}, true)
 
 				if result == brineHide or listed(result, brineHide) then
