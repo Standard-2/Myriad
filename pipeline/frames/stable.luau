@@ -16,4 +16,14 @@ _P = {
 	vers = __COMPOSER.Insert(__COMPOSER.vers),
 }
 
+--[[
+    THIS FILE IS ***NOT*** OBFUSCATED, IT IS MINIFIED.
+    THIS FILE IS ***NOT*** OBFUSCATED, IT IS MINIFIED.
+    THIS FILE IS ***NOT*** OBFUSCATED, IT IS MINIFIED.
+    
+    VIEW THE SOURCE ON GITHUB:
+
+    https://github.com/Standard-2/Myriad
+]]
+
 __COMPOSER.Insert(__COMPOSER.build)
